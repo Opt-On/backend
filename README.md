@@ -10,7 +10,7 @@
 
 4. install python deps using `pip install -r requirements.txt`
 
-5. ...
+5. start fastapi with `fastapi dev main.py`
 
 ## adding packages
 
