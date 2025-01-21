@@ -1,4 +1,4 @@
-package com.opton.spring_boot;
+package com.opton.spring_boot.controller;
 
 import java.util.HashMap;
 import java.util.Map;
