@@ -14,4 +14,9 @@ public  class ListItem implements Comparable<ListItem> {
         int result = this.sbj_list.compareTo(other.sbj_list);
         return result != 0 ? result : this.cnbr_name.compareTo(other.cnbr_name);
     }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s", this.sbj_list, this.cnbr_name);
+    }
 }
