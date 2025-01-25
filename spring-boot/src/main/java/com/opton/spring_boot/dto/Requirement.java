@@ -6,7 +6,12 @@ import lombok.Data;
 public class Requirement implements Comparable<Requirement> {
     private String sbj_list;
     private String cnbr_name;
-    private int number;
+    private int number = -1;
+
+    public Requirement(String sbj_list, String cnbr_name) {
+        this.sbj_list = sbj_list;
+        this.cnbr_name = cnbr_name;
+    }
 
     @Override
     public int compareTo(Requirement requirement) {
