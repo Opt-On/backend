@@ -1,9 +1,7 @@
-package com.opton.spring_boot.dto;
+package com.opton.spring_boot.plan.dto;
 
 import lombok.Data;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -12,32 +10,6 @@ import java.util.List;
 @Data
 @RequiredArgsConstructor
 public class Plan {
-
-    @Getter
-    @RequiredArgsConstructor
-    @ToString
-    public class Category implements Comparable<Category> {
-        private final String name;
-        private final List<Requirement> requirementList = new ArrayList<>();
-
-        /**
-         * Add a requirement with null course to matches.
-         * @param requirement requirement
-         */
-        public void add(Requirement requirement) {
-            requirementList.add(requirement);
-        }
-
-        @Override
-        public int compareTo(Category other) {
-            return this.name.compareTo(other.name);
-        }
-
-        public Iterator<Requirement> getRequirementIterator() {
-            return requirementList.iterator();
-        }
-    }
-
     private final String name;
     private final int calendar;
     private final List<Category> categoryList = new ArrayList<>();

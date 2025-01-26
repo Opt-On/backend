@@ -1,4 +1,4 @@
-package com.opton.spring_boot;
+package com.opton.spring_boot.plan;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,10 +9,11 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.opton.spring_boot.dto.Plan;
-import com.opton.spring_boot.dto.PlanList;
-import com.opton.spring_boot.dto.Requirement;
-import com.opton.spring_boot.dto.ListItem;
+import com.opton.spring_boot.plan.dto.Category;
+import com.opton.spring_boot.plan.dto.ListItem;
+import com.opton.spring_boot.plan.dto.Plan;
+import com.opton.spring_boot.plan.dto.PlanList;
+import com.opton.spring_boot.plan.dto.Requirement;
 
 @Getter
 @Setter
@@ -99,7 +100,7 @@ public class PlanCSVParser {
             String rowName = plan.getName();
             String rowCal = Integer.toString(plan.getCalendar());
             String rowCat = "";
-            for (Plan.Category c : plan.getCategoryList()) {
+            for (Category c : plan.getCategoryList()) {
                 rowCat = c.getName();
                 for (Requirement r : c.getRequirementList()) {
                     csv.append(rowType).append(","); rowType = "";
