@@ -11,7 +11,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class Plan {
     private final String name;
-    private final int calendar;
+    private final int year;
     private final List<Category> categoryList = new ArrayList<>();
 
     public void add(String categoryName, Requirement requirement) {

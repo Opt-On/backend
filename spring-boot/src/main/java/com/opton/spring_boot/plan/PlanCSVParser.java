@@ -47,26 +47,25 @@ public class PlanCSVParser {
             String curType = "";
             String curCategory = "";
             
-            // Skip the header line
             bufferedReader.readLine();
 
             while ((line = bufferedReader.readLine()) != null) {
-                String[] values = line.split(",", -1); // Split by comma, preserving empty fields
+                String[] values = line.split(",", -1);
 
                 if (values.length < 6) {
-                    continue; // Skip invalid lines
+                    continue; 
                 }
 
                 String type = values[0].trim();
                 if (!type.isEmpty()) {
                     curType = type;
                     String name = values[1].trim();
-                    int calendar = Integer.parseInt(values[2].trim());
+                    int year = Integer.parseInt(values[2].trim());
 
                     if (type.equals("list")) {
-                        lists.add(new PlanList(name, calendar));
+                        lists.add(new PlanList(name, year));
                     } else if (type.equals("plan")) {
-                        plans.add(new Plan(name, calendar));
+                        plans.add(new Plan(name, year));
                     }
                 }
 
@@ -98,7 +97,7 @@ public class PlanCSVParser {
         for (Plan plan : plans) {
             String rowType = "plan";
             String rowName = plan.getName();
-            String rowCal = Integer.toString(plan.getCalendar());
+            String rowCal = Integer.toString(plan.getYear());
             String rowCat = "";
             for (Category c : plan.getCategoryList()) {
                 rowCat = c.getName();
@@ -117,7 +116,7 @@ public class PlanCSVParser {
         for (PlanList list : lists) {
             String rowType = "list";
             String rowName = list.getName();
-            String rowCal = Integer.toString(list.getCalendar());
+            String rowCal = Integer.toString(list.getYear());
             String rowCat = "";
             for (ListItem li : list.getItems()) {
                 csv.append(rowType).append(","); rowType = "";

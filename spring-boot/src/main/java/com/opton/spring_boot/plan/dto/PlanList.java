@@ -15,8 +15,8 @@ import java.util.Comparator;
 @ToString
 public class PlanList implements Comparable<PlanList> {
     private final String name;
-    private final int calendar;
-    private final Set<ListItem> items = new TreeSet<>(); // Lists don't have duplicate items
+    private final int year;
+    private final Set<ListItem> items = new TreeSet<>(); 
 
     /**
      * Compares this PlanList to another for ordering.
@@ -27,7 +27,7 @@ public class PlanList implements Comparable<PlanList> {
     @Override
     public int compareTo(PlanList other) {
         return Comparator.comparing(PlanList::getName)
-                .thenComparing(PlanList::getCalendar)
+                .thenComparing(PlanList::getYear)
                 .compare(this, other);
     }
 

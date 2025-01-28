@@ -139,13 +139,13 @@ public class Course implements Comparable<Course> {
     @Override
     public String toString() {
         return String.format("%s%s/%d/%s %s %s",
-                getSubjectCode(), getCatalog(), getTermId(), getCourseGrade(),
-                getRequirementDesignation(), getRequirementDesignationGrade());
+            getSubjectCode(), getCatalog(), getTermId(), getCourseGrade(),
+            getRequirementDesignation(), getRequirementDesignationGrade());
     }
     
     public boolean matches(Requirement requirement) {
-    return this.subjectCode.equals(requirement.getSbj_list()) &&
-           this.catalog.equals(requirement.getCnbr_name());
-}
+        return this.subjectCode.equals(requirement.getSbj_list()) &&
+            this.catalog.equals(requirement.getCnbr_name());
+    }
 
 }
