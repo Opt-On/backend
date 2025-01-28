@@ -17,7 +17,7 @@ public class AuditController {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
 
-    @GetMapping("/degree")
+    @GetMapping("/option")
     public ResponseEntity<Audit> handleOptionAudit() {
         return ResponseEntity.status(HttpStatus.OK).body(null);
     }
