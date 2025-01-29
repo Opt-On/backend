@@ -92,13 +92,12 @@ public class TranscriptParser {
         }
 
         int j = 0;
+        System.out.println("term list size: " + String.valueOf(termList.size()));
         for (int i = 0; i < termList.size(); i++){
-            String season = text.substring(termList[i][0], termList[i][1]);
-            String year = termList.get(i).substring(4,5);
-            System.out.println("season"+season+"year"+year);
+            String season = text.substring(termList.get(i)[2], termList.get(i)[3]);
+            String year = text.substring(termList.get(i)[4], termList.get(i)[5]);
             int termCode = TermSeasonYearToId.termSeasonYearToId(season, year);
-
-            System.out.println(termCode);
+            System.out.println(String.valueOf(termCode));
         }
 
         return new TermSummary();

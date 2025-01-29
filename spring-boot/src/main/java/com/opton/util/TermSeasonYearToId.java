@@ -15,6 +15,7 @@ public class TermSeasonYearToId {
                 month = 1;
                 break;
             default:
+                System.out.println(maybeSeason + "not season");
                 throw new IllegalArgumentException("Not a season: " + maybeSeason);
         }
 
@@ -22,6 +23,7 @@ public class TermSeasonYearToId {
         try {
             year = Integer.parseInt(maybeYear);
         } catch (NumberFormatException e) {
+            System.out.println("not year");
             throw new IllegalArgumentException("Not a year: " + maybeYear);
         }
 
