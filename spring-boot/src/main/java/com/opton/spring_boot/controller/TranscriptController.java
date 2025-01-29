@@ -33,6 +33,7 @@ public class TranscriptController {
             TranscriptParser.ParseTranscript(file);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to process the PDF file");
         }
 

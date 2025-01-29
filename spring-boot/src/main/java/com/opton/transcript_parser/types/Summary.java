@@ -1,6 +1,6 @@
 package com.opton.transcript_parser.types;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class Summary {
     // Student number
@@ -10,5 +10,5 @@ public class Summary {
     public String programName;
 
     // List of TermSummaries
-    public List<TermSummary> termSummaries;
+    public ArrayList<TermSummary> termSummaries;
 } 
