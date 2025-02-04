@@ -1,4 +1,4 @@
-package com.opton.transcript_parser;
+package com.opton.spring_boot.transcript_parser;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +9,8 @@ import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.opton.transcript_parser.types.Summary;
-import com.opton.transcript_parser.types.TermSummary;
+import com.opton.spring_boot.transcript_parser.types.Summary;
+import com.opton.spring_boot.transcript_parser.types.TermSummary;
 import com.opton.util.TermSeasonYearToId;
 
 

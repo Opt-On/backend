@@ -1,4 +1,4 @@
-package com.opton.transcript_parser.types;
+package com.opton.spring_boot.transcript_parser.types;
 import java.util.ArrayList;
 
 public class TermSummary {
