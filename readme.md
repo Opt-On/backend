@@ -7,4 +7,4 @@
 
 # develop in /spring-boot 
 
-* run with ./mvnw spring-boot:run in ./spring-boot/, should be available on http://localhost:8081/
+* run with ./mvnw spring-boot:run or mvn spring-boot:run in ./spring-boot/, should be available on http://localhost:8081/

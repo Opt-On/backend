@@ -48,7 +48,14 @@
             <version>1.18.36</version>
             <scope>provided</scope>
         </dependency>
+		<!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-firestore -->
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-firestore</artifactId>
+			<version>3.30.7</version>
+		</dependency>
 	</dependencies>
+	
 
 	<build>
 		<plugins>
