@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.opton.spring_boot.transcript_parser.TranscriptParser;
+
 @RestController
 @RequestMapping("/transcript")
 public class TranscriptController {
@@ -28,8 +30,10 @@ public class TranscriptController {
 
         try {
             // TODO: Call transcript service
+            TranscriptParser.ParseTranscript(file);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to process the PDF file");
         }
 
