@@ -4,12 +4,14 @@ import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.opton.spring_boot.service.TranscriptService;
 import com.opton.spring_boot.transcript_parser.TranscriptParser;
 
 @RestController
@@ -17,6 +19,11 @@ import com.opton.spring_boot.transcript_parser.TranscriptParser;
 public class TranscriptController {
 
     // TODO: Add dependency injection for transcript service using @AutoWired
+    private final TranscriptService transcriptService;
+
+    public TranscriptController(TranscriptService transcriptService){
+        this.transcriptService = transcriptService;
+    }
     
     @PostMapping("/upload")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
@@ -37,5 +44,16 @@ public class TranscriptController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to process the PDF file");
         }
 
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<String> test(){
+        try{
+            String a = transcriptService.getProgram(20834749);
+            return ResponseEntity.status(200).body(a); 
+        }
+        catch (Exception e){
+            return ResponseEntity.status(200).body("ok");
+        }
     }
 }

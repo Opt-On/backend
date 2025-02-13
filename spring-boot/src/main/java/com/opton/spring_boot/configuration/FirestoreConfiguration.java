@@ -1,4 +1,4 @@
-package com.opton.spring_boot.firestore;
+package com.opton.spring_boot.configuration;
 
 import java.io.FileInputStream;
 
@@ -15,7 +15,7 @@ import com.google.firebase.cloud.FirestoreClient;
 import lombok.SneakyThrows;
 
 @Configuration
-public class FirestoreProvider {
+public class FirestoreConfiguration {
 
     @Bean
     @SneakyThrows
