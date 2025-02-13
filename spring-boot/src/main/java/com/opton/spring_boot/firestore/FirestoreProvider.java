@@ -16,14 +16,11 @@ import lombok.SneakyThrows;
 
 @Configuration
 public class FirestoreProvider {
-    // Use the application default credentials
-    
-    Firestore db = FirestoreClient.getFirestore();
 
     @Bean
     @SneakyThrows
     public FirebaseApp firebaseApp() {
-        FileInputStream serviceAccount = new FileInputStream("spring-boot/firebase-key.json");
+        FileInputStream serviceAccount = new FileInputStream("firebase-key.json");
 		final var firebaseOptions = FirebaseOptions.builder()
 				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
 				.build();
