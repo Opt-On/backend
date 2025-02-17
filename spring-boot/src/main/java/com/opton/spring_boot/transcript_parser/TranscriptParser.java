@@ -20,7 +20,7 @@ public class TranscriptParser {
     private static Pattern levelRegex = Pattern.compile("Level:\\s+(\\w{2,})");
     private static Pattern studentIdRegex = Pattern.compile("Student ID:\\s+(\\d+)");
     private static Pattern termRegex = Pattern.compile("(?m)^\\s*(Fall|Winter|Spring)\\s+(\\d{4})\\s*$");
-    private static Pattern studentNameRegex = Pattern.compile("Name:\\s{11}([^\\n]+)");
+    private static Pattern studentNameRegex = Pattern.compile("Name:\\s+([^\\n]+)");
 
 
     public static boolean IsTransferCredit(String courseLine){
@@ -51,7 +51,7 @@ public class TranscriptParser {
 
     public static Summary ParseTranscript(MultipartFile file) throws Exception{
         String transcriptData = PDFToText(file);
-        System.out.println(transcriptData);
+        // System.out.println(transcriptData);
         ArrayList <TermSummary> termSummaries = extractTermSummaries(transcriptData);
         int studentNumber = extractStudentNumber(transcriptData);
         String programName = extractProgramName(transcriptData);
@@ -151,7 +151,6 @@ public class TranscriptParser {
                 // TODO: use some data type for courses (vs combined string)
                 termSummary.courses.add((course).toLowerCase());
             }
-            // termSummary.courses = ...
             termSummaries.add(termSummary);
         }
 

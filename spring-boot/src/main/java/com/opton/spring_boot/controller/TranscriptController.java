@@ -37,7 +37,6 @@ public class TranscriptController {
         }
 
         try {
-            // TODO: Call transcript service
             Summary summary = TranscriptParser.ParseTranscript(file);
             transcriptService.setProgram(summary);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
