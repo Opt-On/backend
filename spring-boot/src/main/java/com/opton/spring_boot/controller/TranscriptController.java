@@ -38,7 +38,7 @@ public class TranscriptController {
 
         try {
             Summary summary = TranscriptParser.ParseTranscript(file);
-            transcriptService.setProgram(summary);
+            transcriptService.setTranscript(summary);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -49,8 +49,8 @@ public class TranscriptController {
     @GetMapping("/test")
     public ResponseEntity<String> test(){
         try{
-            String a = transcriptService.getProgram(20834749);
-            return ResponseEntity.status(200).body(a); 
+            Summary summary = transcriptService.getTranscript(20834749);
+            return ResponseEntity.status(200).body(summary.studentName); 
         }
         catch (Exception e){
             return ResponseEntity.status(200).body("ok");

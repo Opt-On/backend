@@ -23,19 +23,19 @@ public class TranscriptService {
         this.firestore = firestore;
     }
 
-    public String getProgram(int userId) throws ExecutionException, InterruptedException {
+    public Summary getTranscript(int userId) throws ExecutionException, InterruptedException {
         DocumentReference docRef = firestore.collection("user").document(String.valueOf(userId));
         DocumentSnapshot document = docRef.get().get(); // Blocking call, consider async
 
-        if (document.exists() && document.contains("programName")) {
-            return document.getString("programName");
+        if (document.exists()) {
+            return document.toObject(Summary.class);
         } else {
-            return "Program Name not found";
+            return null;
         }
     }
 
     @Async
-    public CompletableFuture<String> setProgram(Summary summary) {
+    public CompletableFuture<String> setTranscript(Summary summary) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 DocumentReference docRef = firestore.collection("user").document(String.valueOf(summary.studentNumber));
