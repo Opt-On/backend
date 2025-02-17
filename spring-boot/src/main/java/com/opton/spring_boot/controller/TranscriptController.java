@@ -3,8 +3,10 @@ package com.opton.spring_boot.controller;
 import java.util.Objects;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,11 +31,11 @@ public class TranscriptController {
     @PostMapping("/upload")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
         if (file.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No file uploaded");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
         if (!Objects.equals(file.getContentType(), "application/pdf")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Only PDF files are allowed");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
         try {
@@ -43,12 +45,14 @@ public class TranscriptController {
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
             System.err.println(e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to process the PDF file");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
-
     }
 
-    @GetMapping("/test")
+    @
+      
+      
+      ("/test")
     public ResponseEntity<String> test(){
         try{
             String a = transcriptService.getProgram(20834749);

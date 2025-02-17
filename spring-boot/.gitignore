@@ -4,6 +4,9 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+firebase-key.json
+.DS_Store
+DS_Store
 
 ### STS ###
 .apt_generated
