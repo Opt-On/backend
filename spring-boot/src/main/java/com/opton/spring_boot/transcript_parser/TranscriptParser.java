@@ -20,6 +20,8 @@ public class TranscriptParser {
     private static Pattern levelRegex = Pattern.compile("Level:\\s+(\\w{2,})");
     private static Pattern studentIdRegex = Pattern.compile("Student ID:\\s+(\\d+)");
     private static Pattern termRegex = Pattern.compile("(?m)^\\s*(Fall|Winter|Spring)\\s+(\\d{4})\\s*$");
+    private static Pattern studentNameRegex = Pattern.compile("Name:\\s{11}([^\\n]+)");
+
 
     public static boolean IsTransferCredit(String courseLine){
         Matcher regex = courseRegex.matcher(courseLine);
@@ -47,20 +49,23 @@ public class TranscriptParser {
         return results;
     }
 
-    // todo: not void
     public static Summary ParseTranscript(MultipartFile file) throws Exception{
         String transcriptData = PDFToText(file);
+        System.out.println(transcriptData);
         ArrayList <TermSummary> termSummaries = extractTermSummaries(transcriptData);
         int studentNumber = extractStudentNumber(transcriptData);
         String programName = extractProgramName(transcriptData);
+        String studentName = extractStudentName(transcriptData);
 
         Summary summary = new Summary();
         summary.studentNumber = studentNumber;
         summary.programName = programName;
         summary.termSummaries = termSummaries;
+        summary.studentName = studentName;
 
         System.out.println(programName);
         System.out.println(studentNumber);
+        System.out.println(studentName);
 
         return summary;
     }
@@ -169,6 +174,19 @@ public class TranscriptParser {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid student number: " + studentNumberStr);
         }
+    }
+
+    public static String extractStudentName(String text) throws IllegalArgumentException{
+        Matcher studentNameMatcher = studentNameRegex.matcher(text);
+
+
+        if (!studentNameMatcher.find()){
+            throw new IllegalArgumentException("no student id");
+        }
+
+        String studentNumberStr = studentNameMatcher.group(1);
+
+        return studentNumberStr;
     }
 
     public static String extractProgramName(String text) throws IllegalArgumentException {

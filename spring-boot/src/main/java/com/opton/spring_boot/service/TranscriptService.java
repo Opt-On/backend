@@ -1,18 +1,22 @@
 package com.opton.spring_boot.service;
 
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
-import com.opton.spring_boot.entity.Transcript;
 import com.opton.spring_boot.transcript_parser.types.Summary;
 
 @Service
 public class TranscriptService {
     private final Firestore firestore;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     // // constructor injection
     public TranscriptService(Firestore firestore) {
@@ -30,13 +34,22 @@ public class TranscriptService {
         }
     }
 
-    public void add(Summary summary) {
-        System.err.println("adding summary");
-        final var transcript = new Transcript();
-        transcript.setProgramName("summary");
-        transcript.setStudentId(1234);
+    @Async
+    public CompletableFuture<String> setProgram(Summary summary) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                DocumentReference docRef = firestore.collection("user").document(String.valueOf(summary.studentNumber));
+                
+                @SuppressWarnings("unchecked")
+                Map<String, Object> userJson = objectMapper.convertValue(summary, Map.class);
 
-        firestore.collection(Transcript.ENTITY_NAME).document().set(transcript);
+                docRef.set(userJson).get();
+                return "Program Name set successfully";
+            } catch (ExecutionException | InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return "Error setting Program Name";
+            }
+        });
     }
     
 }

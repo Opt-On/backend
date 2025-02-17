@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.opton.spring_boot.service.TranscriptService;
 import com.opton.spring_boot.transcript_parser.TranscriptParser;
+import com.opton.spring_boot.transcript_parser.types.Summary;
 
 @RestController
 @RequestMapping("/transcript")
@@ -37,7 +38,8 @@ public class TranscriptController {
 
         try {
             // TODO: Call transcript service
-            TranscriptParser.ParseTranscript(file);
+            Summary summary = TranscriptParser.ParseTranscript(file);
+            transcriptService.setProgram(summary);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
             System.err.println(e.getMessage());
