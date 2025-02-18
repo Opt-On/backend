@@ -51,5 +51,18 @@ public class TranscriptService {
             }
         });
     }
+
+    // synchronous firestore upload for debug, might wanna switch to this later to handle upload errors
+    // public String setTranscript(Summary summary) throws InterruptedException, ExecutionException {
+    //     DocumentReference docRef = firestore.collection("user").document(String.valueOf(summary.studentNumber));
+        
+    //     @SuppressWarnings("unchecked")
+    //     Map<String, Object> userJson = objectMapper.convertValue(summary, Map.class);
+
+        
+    //     docRef.set(userJson).get();
+    //     return "Program Name set successfully";
+
+    // }
     
 }
