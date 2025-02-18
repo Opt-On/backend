@@ -1,5 +1,6 @@
 package com.opton.spring_boot.transcript_parser;
 import java.io.IOException;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -20,6 +21,9 @@ public class TranscriptParser {
     private static Pattern levelRegex = Pattern.compile("Level:\\s+(\\w{2,})");
     private static Pattern studentIdRegex = Pattern.compile("Student ID:\\s+(\\d+)");
     private static Pattern termRegex = Pattern.compile("(?m)^\\s*(Fall|Winter|Spring)\\s+(\\d{4})\\s*$");
+    private static Pattern studentNameRegex = Pattern.compile("Name:\\s+([^\\n]+)");
+    private static Pattern courseResultRegex = Pattern.compile("([A-Z]{2,})\\s{2,}(\\d{1,3}\\w*)\\s+.*?(\\d\\.\\d{2})\\s*(\\d\\.\\d{2})\\s*(\\d{1,3}|CR|NC)");
+
 
     public static boolean IsTransferCredit(String courseLine){
         Matcher regex = courseRegex.matcher(courseLine);
@@ -47,20 +51,23 @@ public class TranscriptParser {
         return results;
     }
 
-    // todo: not void
     public static Summary ParseTranscript(MultipartFile file) throws Exception{
         String transcriptData = PDFToText(file);
+        // System.out.println(transcriptData);
         ArrayList <TermSummary> termSummaries = extractTermSummaries(transcriptData);
         int studentNumber = extractStudentNumber(transcriptData);
         String programName = extractProgramName(transcriptData);
+        String studentName = extractStudentName(transcriptData);
 
         Summary summary = new Summary();
         summary.studentNumber = studentNumber;
         summary.programName = programName;
         summary.termSummaries = termSummaries;
+        summary.studentName = studentName;
 
         System.out.println(programName);
         System.out.println(studentNumber);
+        System.out.println(studentName);
 
         return summary;
     }
@@ -105,11 +112,13 @@ public class TranscriptParser {
         Matcher termMatcher = termRegex.matcher(text);
         Matcher levelMatcher = levelRegex.matcher(text);
         Matcher courseMatcher = courseRegex.matcher(text);
+        Matcher courseResultMatcher = courseResultRegex.matcher(text);
 
         // iterate through the matches, if len not same throw exception
         List <int[]> termMatches = findAllStringSubmatchIndex(termMatcher);
         List <int[]> levelMatches = findAllStringSubmatchIndex(levelMatcher);
         List <int[]> courseMatches = findAllStringSubmatchIndex(courseMatcher);
+        List <int[]> courseResultMatches = findAllStringSubmatchIndex(courseResultMatcher);
 
         if (termMatches.size() != levelMatches.size()){
             throw new Exception("num terms != num levels");
@@ -118,7 +127,8 @@ public class TranscriptParser {
         // ArrayList<String> courseList = new ArrayList<>();
         ArrayList <TermSummary> termSummaries = new ArrayList<>();
 
-        int j = 0;
+        int j = 0; // courseMatches
+        int k = 0; // courseResultMatches
         for (int i = 0; i < termMatches.size(); i++){
             String season = text.substring(termMatches.get(i)[2], termMatches.get(i)[3]);
             String year = text.substring(termMatches.get(i)[4], termMatches.get(i)[5]);
@@ -143,10 +153,19 @@ public class TranscriptParser {
                 String department = text.substring(courseMatches.get(j)[2], courseMatches.get(j)[3]);
                 String number = text.substring(courseMatches.get(j)[4], courseMatches.get(j)[5]);
                 String course = (department + number).toLowerCase();                
-                // TODO: use some data type for courses (vs combined string)
-                termSummary.courses.add((course).toLowerCase());
+                String grade = "CR";
+                if (
+                    k < courseResultMatches.size()
+                    && text.substring(courseMatches.get(j)[2], courseMatches.get(j)[3])
+                    .equals(text.substring(courseResultMatches.get(k)[2], courseResultMatches.get(k)[3]))
+                    && text.substring(courseMatches.get(j)[3], courseMatches.get(j)[4])
+                    .equals(text.substring(courseResultMatches.get(k)[3], courseResultMatches.get(k)[4]))
+                ){
+                    grade = text.substring(courseResultMatches.get(k)[10], courseResultMatches.get(k)[11]);
+                    k++;
+                }
+                termSummary.courses.add(new AbstractMap.SimpleEntry<>(course.toLowerCase(), grade));
             }
-            // termSummary.courses = ...
             termSummaries.add(termSummary);
         }
 
@@ -169,6 +188,19 @@ public class TranscriptParser {
         } catch (NumberFormatException e) {
             throw new IllegalArgumentException("Invalid student number: " + studentNumberStr);
         }
+    }
+
+    public static String extractStudentName(String text) throws IllegalArgumentException{
+        Matcher studentNameMatcher = studentNameRegex.matcher(text);
+
+
+        if (!studentNameMatcher.find()){
+            throw new IllegalArgumentException("no student id");
+        }
+
+        String studentNumberStr = studentNameMatcher.group(1);
+
+        return studentNumberStr;
     }
 
     public static String extractProgramName(String text) throws IllegalArgumentException {
