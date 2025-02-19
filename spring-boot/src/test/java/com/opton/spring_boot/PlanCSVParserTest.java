@@ -3,8 +3,9 @@ package com.opton.spring_boot;
 import java.io.FileReader;
 import java.io.IOException;
 
-import com.opton.spring_boot.dto.Plan;
-import com.opton.spring_boot.dto.PlanList;
+import com.opton.spring_boot.plan.PlanCSVParser;
+import com.opton.spring_boot.plan.dto.Plan;
+import com.opton.spring_boot.plan.dto.PlanList;
 
 public class PlanCSVParserTest {
 

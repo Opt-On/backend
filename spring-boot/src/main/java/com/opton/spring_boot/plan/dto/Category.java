@@ -1,4 +1,4 @@
-package com.opton.spring_boot.dto;
+package com.opton.spring_boot.plan.dto;
 
 import java.util.List;
 import java.util.stream.Collectors;

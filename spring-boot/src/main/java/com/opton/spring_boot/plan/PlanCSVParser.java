@@ -1,4 +1,4 @@
-package com.opton.spring_boot;
+package com.opton.spring_boot.plan;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,10 +9,10 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.opton.spring_boot.dto.Plan;
-import com.opton.spring_boot.dto.PlanList;
-import com.opton.spring_boot.dto.Requirement;
-import com.opton.spring_boot.dto.ListItem;
+import com.opton.spring_boot.plan.dto.ListItem;
+import com.opton.spring_boot.plan.dto.Plan;
+import com.opton.spring_boot.plan.dto.PlanList;
+import com.opton.spring_boot.plan.dto.Requirement;
 
 @Getter
 @Setter
@@ -46,14 +46,13 @@ public class PlanCSVParser {
             String curType = "";
             String curCategory = "";
             
-            // Skip the header line
             bufferedReader.readLine();
 
             while ((line = bufferedReader.readLine()) != null) {
-                String[] values = line.split(",", -1); // Split by comma, preserving empty fields
+                String[] values = line.split(",", -1); 
 
                 if (values.length < 6) {
-                    continue; // Skip invalid lines
+                    continue; 
                 }
 
                 String type = values[0].trim();
