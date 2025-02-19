@@ -33,4 +33,15 @@ public class Requirement implements Comparable<Requirement> {
             return sbj_list + cnbr_name; 
         }
     }
+
+    /**
+     * Checks if this requirement matches the given list item.
+     *
+     * @param item The list item to check.
+     * @return True if the requirement matches the list item, false otherwise.
+     */
+    public boolean matches(ListItem item) {
+        return this.sbj_list.equals(item.getSbj_list()) &&
+               this.cnbr_name.equals(item.getCnbr_name());
+    }
 }
