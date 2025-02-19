@@ -5,14 +5,16 @@ import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Iterator;
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Course requirements are grouped into named categories. A category
  * maintains a list of matches of course to requirement.
  */
 @Data
+@RequiredArgsConstructor
 public class Category implements Comparable<Category> {
-    private String name;
+    private final String name;
     private List<Requirement> requirementList = new ArrayList<>();
 
     /**

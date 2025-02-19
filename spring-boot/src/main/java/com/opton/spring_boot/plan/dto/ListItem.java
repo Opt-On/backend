@@ -1,9 +1,9 @@
 package com.opton.spring_boot.plan.dto;
 
-import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@Data
+@Getter
 @RequiredArgsConstructor
 public  class ListItem implements Comparable<ListItem> {
     private final String sbj_list; 

@@ -9,6 +9,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.opton.spring_boot.plan.dto.Category;
 import com.opton.spring_boot.plan.dto.ListItem;
 import com.opton.spring_boot.plan.dto.Plan;
 import com.opton.spring_boot.plan.dto.PlanList;
@@ -49,7 +50,7 @@ public class PlanCSVParser {
             bufferedReader.readLine();
 
             while ((line = bufferedReader.readLine()) != null) {
-                String[] values = line.split(",", -1); 
+                String[] values = line.split(",", -1);
 
                 if (values.length < 6) {
                     continue; 
@@ -59,12 +60,12 @@ public class PlanCSVParser {
                 if (!type.isEmpty()) {
                     curType = type;
                     String name = values[1].trim();
-                    int calendar = Integer.parseInt(values[2].trim());
+                    int year = Integer.parseInt(values[2].trim());
 
                     if (type.equals("list")) {
-                        lists.add(new PlanList(name, calendar));
+                        lists.add(new PlanList(name, year));
                     } else if (type.equals("plan")) {
-                        plans.add(new Plan(name, calendar));
+                        plans.add(new Plan(name, year));
                     }
                 }
 
@@ -96,9 +97,9 @@ public class PlanCSVParser {
         for (Plan plan : plans) {
             String rowType = "plan";
             String rowName = plan.getName();
-            String rowCal = Integer.toString(plan.getCalendar());
+            String rowCal = Integer.toString(plan.getYear());
             String rowCat = "";
-            for (Plan.Category c : plan.getCategoryList()) {
+            for (Category c : plan.getCategoryList()) {
                 rowCat = c.getName();
                 for (Requirement r : c.getRequirementList()) {
                     csv.append(rowType).append(","); rowType = "";
@@ -115,7 +116,7 @@ public class PlanCSVParser {
         for (PlanList list : lists) {
             String rowType = "list";
             String rowName = list.getName();
-            String rowCal = Integer.toString(list.getCalendar());
+            String rowCal = Integer.toString(list.getYear());
             String rowCat = "";
             for (ListItem li : list.getItems()) {
                 csv.append(rowType).append(","); rowType = "";

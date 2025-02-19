@@ -1,8 +1,8 @@
 package com.opton.spring_boot.plan.dto;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class Requirement implements Comparable<Requirement> {
     private String sbj_list;
     private String cnbr_name;
