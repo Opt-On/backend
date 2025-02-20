@@ -108,11 +108,6 @@ public class Audit {
         if (courseList.isEmpty()) {
             return Status.Incomplete;
         } else {
-            for (Course course : courseList) {
-                if (course.inProgress()) {
-                    return Status.Provisionally_Complete;
-                }
-            }
             return Status.Complete;
         }
     }

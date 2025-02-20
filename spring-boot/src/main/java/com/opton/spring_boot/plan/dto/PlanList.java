@@ -6,6 +6,9 @@ import lombok.Getter;
 
 import java.util.Set;
 import java.util.TreeSet;
+
+import com.opton.spring_boot.audit.dto.Course;
+
 import java.util.Comparator;
 
 @Data
@@ -14,7 +17,7 @@ import java.util.Comparator;
 public class PlanList implements Comparable<PlanList> {
     private final String name;
     private final int year;
-    private final Set<ListItem> items = new TreeSet<>(); 
+    private final Set<Course> items = new TreeSet<>(); 
 
     /**
      * Compares this PlanList to another for ordering.
@@ -30,13 +33,13 @@ public class PlanList implements Comparable<PlanList> {
     }
 
     /**
-     * Adds a new ListItem to the PlanList.
+     * Adds a new Course to the PlanList.
      *
      * @param sbj_list The subject list of the item.
      * @param cnbr_name The course number name of the item.
      */
     public void add(String sbj_list, String cnbr_name) {
-        items.add(new ListItem(sbj_list, cnbr_name));
+        items.add(new Course(sbj_list, cnbr_name));
     }
 
     /**

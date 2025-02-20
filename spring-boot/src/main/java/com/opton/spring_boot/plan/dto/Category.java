@@ -7,6 +7,7 @@ import java.util.Iterator;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
+@Getter
 public class Category implements Comparable<Category> {
     private final String name;
     private List<Requirement> requirementList = new ArrayList<>();

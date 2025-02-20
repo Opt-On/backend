@@ -11,8 +11,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.opton.spring_boot.audit.dto.Course;
 import com.opton.spring_boot.plan.dto.Category;
-import com.opton.spring_boot.plan.dto.ListItem;
 import com.opton.spring_boot.plan.dto.Plan;
 import com.opton.spring_boot.plan.dto.PlanList;
 import com.opton.spring_boot.plan.dto.Requirement;
@@ -121,7 +121,7 @@ public class PlanCSVParser {
             String rowName = list.getName();
             String rowCal = Integer.toString(list.getYear());
             String rowCat = "";
-            for (ListItem li : list.getItems()) {
+            for (Course li : list.getItems()) {
                 csv.append(rowType).append(","); rowType = "";
                 csv.append(rowName).append(","); rowName = "";
                 csv.append(rowCal).append(","); rowCal = "";
