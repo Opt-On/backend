@@ -50,10 +50,6 @@ public class AuditFactory {
                         .filter(course -> courseMatchesRequirement(course, requirement))
                         .collect(Collectors.toList());
 
-                // Debugging: Print the requirement and matched courses
-                System.out.println("Requirement: " + requirement.getSbj_list() + " " + requirement.getCnbr_name());
-                System.out.println("Matched Courses: " + matchedCourses);
-
                 requirementCourseListMap.put(requirement, matchedCourses);
             }
         }
@@ -73,22 +69,30 @@ public class AuditFactory {
         // Iterate through each term and extract courses
         for (TermSummary termSummary : summary.termSummaries) {
             for (var courseEntry : termSummary.courses) {
-                // Split the course name into subject and number
                 String courseName = courseEntry.getKey();
-                String[] parts = courseName.split(" ", 2); // Split into subject and the rest
+                String[] parts = courseName.split(" ", 2); 
                 String subject = parts[0];
                 String number = parts.length > 1 ? parts[1] : "";
 
-                // Create a Course object with separate subject and number
+                subject = normalize(subject);
+                number = normalize(number);
+
                 Course course = new Course(subject, number);
                 courseList.add(course);
             }
         }
 
-        // Debugging: Print the student's courses
-        System.out.println("Student Courses: " + courseList);
-
         return courseList;
+    }
+
+    /**
+     * Normalizes a course code by removing whitespace and converting to uppercase.
+     *
+     * @param courseCode The course code to normalize.
+     * @return The normalized course code.
+     */
+    private static String normalize(String courseCode) {
+        return courseCode.replaceAll("\\s", "").toUpperCase();
     }
 
     /**
@@ -99,13 +103,10 @@ public class AuditFactory {
      * @return True if the course matches the requirement, false otherwise.
      */
     private static boolean courseMatchesRequirement(Course course, Requirement requirement) {
-        boolean matches = course.getSbj_list().equals(requirement.getSbj_list()) && 
-                          course.getCnbr_name().equals(requirement.getCnbr_name());
+        String normalizedCourseCode = normalize(course.getSbj_list() + course.getCnbr_name());
+        String normalizedRequirementCode = normalize(requirement.getSbj_list() + requirement.getCnbr_name());
 
-        // Debugging: Print the comparison
-        System.out.println("Comparing Course: " + course.getSbj_list() + " " + course.getCnbr_name() + 
-                           " with Requirement: " + requirement.getSbj_list() + " " + requirement.getCnbr_name() + 
-                           " -> " + matches);
+        boolean matches = normalizedCourseCode.equals(normalizedRequirementCode);
 
         return matches;
     }
