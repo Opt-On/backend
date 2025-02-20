@@ -9,6 +9,8 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import com.opton.spring_boot.plan.dto.Category;
 import com.opton.spring_boot.plan.dto.ListItem;
 import com.opton.spring_boot.plan.dto.Plan;
@@ -17,6 +19,7 @@ import com.opton.spring_boot.plan.dto.Requirement;
 
 @Getter
 @Setter
+@Component
 public class PlanCSVParser {
     private List<Plan> plans = new ArrayList<>();
     private List<PlanList> lists = new ArrayList<>();

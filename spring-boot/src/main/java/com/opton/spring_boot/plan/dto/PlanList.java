@@ -1,5 +1,6 @@
 package com.opton.spring_boot.plan.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 
@@ -9,6 +10,7 @@ import java.util.Comparator;
 
 @Data
 @Getter
+@AllArgsConstructor
 public class PlanList implements Comparable<PlanList> {
     private final String name;
     private final int year;

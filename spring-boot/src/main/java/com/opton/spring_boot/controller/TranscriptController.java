@@ -19,7 +19,6 @@ import com.opton.spring_boot.transcript_parser.types.Summary;
 @RequestMapping("/transcript")
 public class TranscriptController {
 
-    // TODO: Add dependency injection for transcript service using @AutoWired <- maybe schizo message
     private final TranscriptService transcriptService;
 
     public TranscriptController(TranscriptService transcriptService){

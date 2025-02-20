@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
@@ -12,6 +14,7 @@ import lombok.RequiredArgsConstructor;
  * maintains a list of matches of course to requirement.
  */
 @Data
+@AllArgsConstructor
 @RequiredArgsConstructor
 public class Category implements Comparable<Category> {
     private final String name;
@@ -20,7 +23,7 @@ public class Category implements Comparable<Category> {
     /**
      * Add a requirement with null course to matches.
      * @param requirement requirement
-     */
+     */ 
     public void add(Requirement requirement) {
         requirementList.add(requirement);
     }

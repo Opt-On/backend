@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @RequiredArgsConstructor
-public class Plan {
+public class Plan { 
     private final String name;
     private final int year;
     private final List<Category> categoryList = new ArrayList<>();

@@ -239,7 +239,8 @@ public class AuditFactory {
             List<Course> courseList = new ArrayList<>();
             int courseIndexMatch = allocator.firstRow(rqmtIndex);
 
-            if (courseIndexMatch < courseRequirementMap.size()) {
+            // Check if a valid course index was found
+            if (courseIndexMatch >= 0 && courseIndexMatch < courseArray.length) {
                 Course course = courseArray[courseIndexMatch];
                 if (isCoreqList(course, coreqMap)) {
                     courseList.addAll(coreqMap.get(course.getCatalog()));
@@ -248,6 +249,7 @@ public class AuditFactory {
                 }
             }
 
+            // Add the requirement and its matched courses (if any) to the solution map
             solution.put(rqmtList.get(rqmtIndex), courseList);
         }
 
