@@ -239,9 +239,6 @@ public class TranscriptParser {
                 if (programName.contains("/")){
                     programName = programName.replace("/", "/ ");
                 }
-                else {
-                    // programName = programName.replaceFirst(",", "/");
-                }
 
                 programName = programName
                     .replace("\n", "/ ")

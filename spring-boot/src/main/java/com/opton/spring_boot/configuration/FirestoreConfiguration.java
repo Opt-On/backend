@@ -20,15 +20,12 @@ public class FirestoreConfiguration {
     @Bean
     @SneakyThrows
     public FirebaseApp firebaseApp() {
-        if (FirebaseApp.getApps().isEmpty()) {
-            FileInputStream serviceAccount = new FileInputStream("firebase-key.json");
-            final var firebaseOptions = FirebaseOptions.builder()
-                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                    .build();
-            return FirebaseApp.initializeApp(firebaseOptions);
-        } else {
-            return FirebaseApp.getInstance();
-        }
+        FileInputStream serviceAccount = new FileInputStream("firebase-key.json");
+		final var firebaseOptions = FirebaseOptions.builder()
+				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+				.build();
+
+		return FirebaseApp.initializeApp(firebaseOptions);
     }
 
     @Bean
