@@ -2,6 +2,7 @@ package com.opton.spring_boot.controller;
 
 import java.util.Objects;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,7 +20,7 @@ import com.opton.spring_boot.transcript_parser.types.Summary;
 @RequestMapping("/transcript")
 public class TranscriptController {
 
-    // TODO: Add dependency injection for transcript service using @AutoWired <- maybe schizo message
+    @Autowired
     private final TranscriptService transcriptService;
 
     public TranscriptController(TranscriptService transcriptService){
