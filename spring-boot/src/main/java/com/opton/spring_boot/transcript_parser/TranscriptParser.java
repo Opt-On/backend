@@ -240,15 +240,16 @@ public class TranscriptParser {
                     programName = programName.replace("/", "/ ");
                 }
                 else {
-                    programName = programName.replaceFirst(",", "/");
+                    // programName = programName.replaceFirst(",", "/");
                 }
 
                 programName = programName
-                    .replace("\n", " ")
+                    .replace("\n", "/ ")
                     .replace("Honours", " ")
                     .replace("Co-operative Program", " ")
                     .replace(",", " ")
                     .replaceAll("\\s+", " ") // multi spaces
+                    .replaceAll(" /", "/")
                     .trim();
                 return programName;
             }
