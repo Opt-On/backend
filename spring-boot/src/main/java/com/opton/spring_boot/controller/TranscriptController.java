@@ -28,7 +28,7 @@ public class TranscriptController {
     }
     
     @PostMapping("/upload")
-    public ResponseEntity<Summary> handleFileUpload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "true") boolean includeGrade) {
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -39,8 +39,8 @@ public class TranscriptController {
 
         try {
             Summary summary = TranscriptParser.ParseTranscript(file);
-            transcriptService.setTranscript(summary);
-            return ResponseEntity.status(HttpStatus.OK).body(summary);
+            transcriptService.setTranscript(summary, includeGrade);
+            return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
             System.err.println(e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);

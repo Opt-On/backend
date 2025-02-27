@@ -228,12 +228,29 @@ public class TranscriptParser {
         // Skip "Program:" to get the start of the program name
         start += 8;
 
+        String target = "Level:";
+        
         // Find the end of the program name (delimited by ',' or '\n')
         for (int end = start; end < text.length(); end++) {
-            char ch = text.charAt(end);
-            if (ch == ',' || ch == '\n') {
-                // Extract and trim the program name
-                return text.substring(start, end).trim();
+            if (text.startsWith(target, end)) {
+                String programName = text.substring(start, end);
+
+                // get it in consistent PROGRAM_NAME/ "OPTION_NAME" format
+                if (programName.contains("/")){
+                    programName = programName.replace("/", "/ ");
+                }
+                else {
+                    programName = programName.replaceFirst(",", "/");
+                }
+
+                programName = programName
+                    .replace("\n", " ")
+                    .replace("Honours", " ")
+                    .replace("Co-operative Program", " ")
+                    .replace(",", " ")
+                    .replaceAll("\\s+", " ") // multi spaces
+                    .trim();
+                return programName;
             }
         }
 
