@@ -22,8 +22,8 @@ public class TranscriptParser {
     private static Pattern studentIdRegex = Pattern.compile("Student ID:\\s+(\\d+)");
     private static Pattern termRegex = Pattern.compile("(?m)^\\s*(Fall|Winter|Spring)\\s+(\\d{4})\\s*$");
     private static Pattern studentNameRegex = Pattern.compile("Name:\\s+([^\\n]+)");
-    private static Pattern courseResultRegex = Pattern.compile("([A-Z]{2,})\\s{2,}(\\d{1,3}\\w*)\\s+.*?(\\d\\.\\d{2})\\s*(\\d\\.\\d{2})\\s*(\\d{1,3}|CR|NC)");
-
+    private static Pattern courseResultRegex = Pattern.compile("([A-Z]{2,})\\s{2,}(\\d{1,3}\\w*)\\s+.*?(\\d\\.\\d{2})\\s*(\\d\\.\\d{2})\\s*(\\d{1,3}|CR|NC|NG)");
+    private static Pattern completedCourseRegex = Pattern.compile("([A-Z]{2,})\\s{2,}(\\d{1,3}\\w*)\\s{1,}.*(\\d\\.\\d{2}).*\\n");
 
     public static boolean IsTransferCredit(String courseLine){
         Matcher regex = courseRegex.matcher(courseLine);
@@ -113,22 +113,24 @@ public class TranscriptParser {
         Matcher levelMatcher = levelRegex.matcher(text);
         Matcher courseMatcher = courseRegex.matcher(text);
         Matcher courseResultMatcher = courseResultRegex.matcher(text);
+        Matcher completedCourseMatcher = completedCourseRegex.matcher(text);
 
         // iterate through the matches, if len not same throw exception
         List <int[]> termMatches = findAllStringSubmatchIndex(termMatcher);
         List <int[]> levelMatches = findAllStringSubmatchIndex(levelMatcher);
         List <int[]> courseMatches = findAllStringSubmatchIndex(courseMatcher);
         List <int[]> courseResultMatches = findAllStringSubmatchIndex(courseResultMatcher);
+        List <int[]> completedCoursesMatches = findAllStringSubmatchIndex(completedCourseMatcher);
 
         if (termMatches.size() != levelMatches.size()){
             throw new Exception("num terms != num levels");
         }
 
-        // ArrayList<String> courseList = new ArrayList<>();
         ArrayList <TermSummary> termSummaries = new ArrayList<>();
 
         int j = 0; // courseMatches
         int k = 0; // courseResultMatches
+        int l = 0; // completedCoursesMatches
         for (int i = 0; i < termMatches.size(); i++){
             String season = text.substring(termMatches.get(i)[2], termMatches.get(i)[3]);
             String year = text.substring(termMatches.get(i)[4], termMatches.get(i)[5]);
@@ -152,8 +154,9 @@ public class TranscriptParser {
                 // course info
                 String department = text.substring(courseMatches.get(j)[2], courseMatches.get(j)[3]);
                 String number = text.substring(courseMatches.get(j)[4], courseMatches.get(j)[5]);
-                String course = (department + number).toLowerCase();                
+                String course = (department + " " + number);                
                 String grade = "CR";
+
                 if (
                     k < courseResultMatches.size()
                     && text.substring(courseMatches.get(j)[2], courseMatches.get(j)[3])
@@ -164,7 +167,19 @@ public class TranscriptParser {
                     grade = text.substring(courseResultMatches.get(k)[10], courseResultMatches.get(k)[11]);
                     k++;
                 }
-                termSummary.courses.add(new AbstractMap.SimpleEntry<>(course.toLowerCase(), grade));
+                // check if course is graded (i.e not in currently in progress)
+                if (
+                    l < completedCoursesMatches.size()
+                    && text.substring(courseMatches.get(j)[2], courseMatches.get(j)[3])
+                    .equals(text.substring(completedCoursesMatches.get(l)[2], completedCoursesMatches.get(l)[3]))
+                ){
+                    l ++;
+                }
+                else {
+                    grade = "In Progress";
+                }
+
+                termSummary.courses.add(new AbstractMap.SimpleEntry<>(course, grade));
             }
             termSummaries.add(termSummary);
         }
@@ -213,12 +228,27 @@ public class TranscriptParser {
         // Skip "Program:" to get the start of the program name
         start += 8;
 
+        String target = "Level:";
+        
         // Find the end of the program name (delimited by ',' or '\n')
         for (int end = start; end < text.length(); end++) {
-            char ch = text.charAt(end);
-            if (ch == ',' || ch == '\n') {
-                // Extract and trim the program name
-                return text.substring(start, end).trim();
+            if (text.startsWith(target, end)) {
+                String programName = text.substring(start, end);
+
+                // get it in consistent PROGRAM_NAME/ "OPTION_NAME" format
+                if (programName.contains("/")){
+                    programName = programName.replace("/", "/ ");
+                }
+
+                programName = programName
+                    .replace("\n", "/ ")
+                    .replace("Honours", " ")
+                    .replace("Co-operative Program", " ")
+                    .replace(",", " ")
+                    .replaceAll("\\s+", " ") // multi spaces
+                    .replaceAll(" /", "/")
+                    .trim();
+                return programName;
             }
         }
 

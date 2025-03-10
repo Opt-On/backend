@@ -2,6 +2,7 @@ package com.opton.spring_boot.controller;
 
 import java.util.Objects;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,7 @@ import com.opton.spring_boot.transcript_parser.types.Summary;
 @RequestMapping("/transcript")
 public class TranscriptController {
 
+    @Autowired
     private final TranscriptService transcriptService;
 
     public TranscriptController(TranscriptService transcriptService){
@@ -26,7 +28,7 @@ public class TranscriptController {
     }
     
     @PostMapping("/upload")
-    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "true") boolean includeGrade) {
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -37,7 +39,7 @@ public class TranscriptController {
 
         try {
             Summary summary = TranscriptParser.ParseTranscript(file);
-            transcriptService.setTranscript(summary);
+            transcriptService.setTranscript(summary, includeGrade);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
             System.err.println(e.getMessage());

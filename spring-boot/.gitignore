@@ -37,3 +37,10 @@ build/
 .vscode/
 
 *firebase-key.json
+
+#pdf
+*.pdf
+
+# Allow specific PDFs (whitelist)
+!transcript-simple.pdf
+!transcript-transfer.pdf

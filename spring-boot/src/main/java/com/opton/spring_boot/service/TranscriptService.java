@@ -1,5 +1,6 @@
 package com.opton.spring_boot.service;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -35,11 +36,16 @@ public class TranscriptService {
     }
 
     @Async
-    public CompletableFuture<String> setTranscript(Summary summary) {
+    public CompletableFuture<String> setTranscript(Summary summary, Boolean includeGrade) {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 DocumentReference docRef = firestore.collection("user").document(String.valueOf(summary.studentNumber));
                 
+                // bypass adding grade info
+                if (!includeGrade){
+                    summary.termSummaries = new ArrayList<>();
+                }
+
                 @SuppressWarnings("unchecked")
                 Map<String, Object> userJson = objectMapper.convertValue(summary, Map.class);
 
