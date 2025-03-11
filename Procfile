@@ -1,2 +1,2 @@
-release: cd spring-boot && mvn clean install -DskipTests
-web: cd spring-boot && java -jar target/opton.jar
+release: mvn -f spring-boot/pom.xml clean install -DskipTests
+web: java -jar spring-boot/target/opton.jar
