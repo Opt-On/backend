@@ -84,6 +84,7 @@
 	
 
 	<build>
+		<finalName>opton</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
