@@ -12,11 +12,7 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                // registry.addMapping("/**") // Apply to all endpoints
-                //         .allowedOrigins("*") // Allow frontend
-                //         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow these HTTP methods
-                //         .allowedHeaders("*") // Allow all headers
-                //         .allowCredentials(true); // Allow cookies/auth headers
+                registry.addMapping("/transcript/upload").allowedOrigins("http://localhost:3000");
             }
         };
     }
