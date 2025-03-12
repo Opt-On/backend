@@ -1,7 +1,10 @@
 package com.opton.spring_boot.transcript_parser;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,9 +64,19 @@ public class TranscriptParser {
 
         Summary summary = new Summary();
         summary.studentNumber = studentNumber;
-        summary.programName = programName;
         summary.termSummaries = termSummaries;
-        summary.studentName = studentName;
+        String[] nameParts = studentName.split(", ");
+        summary.lastName = nameParts[0];
+        summary.firstName = nameParts.length > 1 ? nameParts[1] : "bozo";
+
+        String[] programParts = programName.trim().split("/\\s*");
+        summary.programName = programParts[0];
+
+        if (programParts.length > 1) {
+            summary.optionNames = Arrays.copyOfRange(programParts, 1, programParts.length);
+        }
+        
+        summary.uploadDate = LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
 
         System.out.println(programName);
         System.out.println(studentNumber);

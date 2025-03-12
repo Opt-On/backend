@@ -5,6 +5,7 @@ import java.util.Objects;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import com.opton.spring_boot.service.TranscriptService;
 import com.opton.spring_boot.transcript_parser.TranscriptParser;
 import com.opton.spring_boot.transcript_parser.types.Summary;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/transcript")
 public class TranscriptController {
@@ -27,8 +29,9 @@ public class TranscriptController {
         this.transcriptService = transcriptService;
     }
     
+    @CrossOrigin
     @PostMapping("/upload")
-    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "true") boolean includeGrade) {
+    public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "true") boolean includeGrade, @RequestParam("email") String email) {
         if (file.isEmpty()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
@@ -39,7 +42,7 @@ public class TranscriptController {
 
         try {
             Summary summary = TranscriptParser.ParseTranscript(file);
-            transcriptService.setTranscript(summary, includeGrade);
+            transcriptService.setTranscript(summary, includeGrade, email);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -47,11 +50,12 @@ public class TranscriptController {
         }
     }
 
+    @CrossOrigin
     @GetMapping("/test")
     public ResponseEntity<String> test(){
         try{
             Summary summary = transcriptService.getTranscript(20834749);
-            return ResponseEntity.status(200).body(summary.studentName); 
+            return ResponseEntity.status(200).body(summary.firstName); 
         }
         catch (Exception e){
             return ResponseEntity.status(200).body("ok");

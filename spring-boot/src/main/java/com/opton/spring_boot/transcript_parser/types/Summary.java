@@ -5,13 +5,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Summary {
-    // Student number
     public int studentNumber;
-    public String studentName;
-
-    // Program name
+    public String firstName;
+    public String lastName;
     public String programName;
-
-    // List of TermSummaries
+    public String[] optionNames;
+    public String uploadDate;
     public ArrayList<TermSummary> termSummaries;
 } 
