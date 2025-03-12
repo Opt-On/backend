@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -49,15 +50,15 @@ public class TranscriptController {
         }
     }
 
-    // @CrossOrigin
-    // @GetMapping("/test")
-    // public ResponseEntity<String> test(){
-    //     try{
-    //         Summary summary = transcriptService.getTranscript(20834749);
-    //         return ResponseEntity.status(200).body(summary.studentName); 
-    //     }
-    //     catch (Exception e){
-    //         return ResponseEntity.status(200).body("ok");
-    //     }
-    // }
+    @CrossOrigin
+    @GetMapping("/test")
+    public ResponseEntity<String> test(){
+        try{
+            Summary summary = transcriptService.getTranscript(20834749);
+            return ResponseEntity.status(200).body(summary.firstName); 
+        }
+        catch (Exception e){
+            return ResponseEntity.status(200).body("ok");
+        }
+    }
 }

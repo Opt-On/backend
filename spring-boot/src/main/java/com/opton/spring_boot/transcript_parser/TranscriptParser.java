@@ -62,20 +62,19 @@ public class TranscriptParser {
 
         Summary summary = new Summary();
         summary.studentNumber = studentNumber;
-        // summary.programName = programName;
         summary.termSummaries = termSummaries;
         String[] nameParts = studentName.split(", ");
         summary.lastName = nameParts[0];
         summary.firstName = nameParts.length > 1 ? nameParts[1] : "bozo";
 
         String[] programParts = programName.trim().split("/\\s*");
-        summary.programName = programParts[0];  // First part is the program name
+        summary.programName = programParts[0];
 
         if (programParts.length > 1) {
             summary.optionNames = Arrays.copyOfRange(programParts, 1, programParts.length);
         }
 
-        // System.out.println(programName);
+        System.out.println(programName);
         System.out.println(studentNumber);
         System.out.println(studentName);
 
