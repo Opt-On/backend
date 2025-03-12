@@ -2,6 +2,7 @@ package com.opton.spring_boot.transcript_parser;
 import java.io.IOException;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,11 +62,20 @@ public class TranscriptParser {
 
         Summary summary = new Summary();
         summary.studentNumber = studentNumber;
-        summary.programName = programName;
+        // summary.programName = programName;
         summary.termSummaries = termSummaries;
-        summary.studentName = studentName;
+        String[] nameParts = studentName.split(", ");
+        summary.lastName = nameParts[0];
+        summary.firstName = nameParts.length > 1 ? nameParts[1] : "bozo";
 
-        System.out.println(programName);
+        String[] programParts = programName.trim().split("/\\s*");
+        summary.programName = programParts[0];  // First part is the program name
+
+        if (programParts.length > 1) {
+            summary.optionNames = Arrays.copyOfRange(programParts, 1, programParts.length);
+        }
+
+        // System.out.println(programName);
         System.out.println(studentNumber);
         System.out.println(studentName);
 

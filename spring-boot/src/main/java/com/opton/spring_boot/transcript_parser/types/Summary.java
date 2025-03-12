@@ -7,10 +7,12 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class Summary {
     // Student number
     public int studentNumber;
-    public String studentName;
+    public String firstName;
+    public String lastName;
 
     // Program name
     public String programName;
+    public String[] optionNames;
 
     // List of TermSummaries
     public ArrayList<TermSummary> termSummaries;
