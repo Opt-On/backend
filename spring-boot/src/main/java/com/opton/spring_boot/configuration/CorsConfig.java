@@ -12,9 +12,6 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                // for (int i = 0; i < 100; i ++){
-                //     System.err.println("FUCK YOU BITCH");
-                // }
                 // registry.addMapping("/**") // Apply to all endpoints
                 //         .allowedOrigins("*") // Allow frontend
                 //         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // Allow these HTTP methods
