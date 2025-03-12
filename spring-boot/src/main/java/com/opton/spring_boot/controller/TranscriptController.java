@@ -17,7 +17,6 @@ import com.opton.spring_boot.service.TranscriptService;
 import com.opton.spring_boot.transcript_parser.TranscriptParser;
 import com.opton.spring_boot.transcript_parser.types.Summary;
 
-@CrossOrigin
 @RestController
 @RequestMapping("/transcript")
 public class TranscriptController {
@@ -29,7 +28,7 @@ public class TranscriptController {
         this.transcriptService = transcriptService;
     }
     
-    @CrossOrigin
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/upload")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "true") boolean includeGrade, @RequestParam("email") String email) {
         if (file.isEmpty()) {
