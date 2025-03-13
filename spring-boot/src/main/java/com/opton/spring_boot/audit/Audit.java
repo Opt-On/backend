@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import com.opton.spring_boot.audit.dto.Course;
 import com.opton.spring_boot.plan.dto.Category;
 import com.opton.spring_boot.plan.dto.Plan;
 import com.opton.spring_boot.plan.dto.Requirement;
@@ -105,7 +104,7 @@ public class Audit {
      * @return the status of the requirement
      */
     private Status calculateRequirementStatus(List<Course> courseList) {
-        if (courseList.isEmpty()) {
+        if (courseList == null || courseList.isEmpty()) {
             return Status.Incomplete;
         } else {
             return Status.Complete;

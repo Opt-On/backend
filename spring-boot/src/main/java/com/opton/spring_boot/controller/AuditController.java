@@ -1,7 +1,5 @@
 package com.opton.spring_boot.controller;
 
-import java.util.ArrayList;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +11,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.opton.spring_boot.audit.Audit;
 import com.opton.spring_boot.audit.AuditFactory;
-import com.opton.spring_boot.audit.dto.*;
 import com.opton.spring_boot.plan.dto.Plan;
 import com.opton.spring_boot.plan.dto.Requirement;
 import com.opton.spring_boot.transcript_parser.TranscriptParser;
@@ -28,10 +25,11 @@ public class AuditController {
         try {            
             Plan plan = getPlan();
             Summary summary = TranscriptParser.ParseTranscript(file);
-            Audit audit = AuditFactory.getAudit(plan, summary, new ArrayList<Approval>());
+            Audit audit = AuditFactory.getAudit(plan, summary);
 
             return ResponseEntity.status(HttpStatus.OK).body(audit);
         } catch (Exception e) {
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
