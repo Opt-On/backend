@@ -2,6 +2,7 @@ package com.opton.spring_boot.configuration;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,6 +23,10 @@ public class FirestoreConfiguration {
     @Bean
     @SneakyThrows
     public FirebaseApp firebaseApp() {
+        List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
+        if (!firebaseApps.isEmpty()) {
+            return firebaseApps.get(0); // Return existing instance
+        }
         Dotenv dotenv = Dotenv.load();
         
         String privateKey = dotenv.get("FIREBASE_PRIVATE_KEY").replace("\\n", "\n");
