@@ -10,7 +10,8 @@ import com.opton.spring_boot.transcript_parser.types.TermSummary;
 import java.util.*;
 
 /**
- * AuditFactory produces an Audit for a given plan, student summary, and PlanLists.
+ * AuditFactory produces an Audit for a given plan, student summary, and
+ * PlanLists.
  */
 public class AuditFactory {
 
@@ -36,26 +37,33 @@ public class AuditFactory {
      * @param planLists The list of PlanLists to use for flexible requirements.
      * @return A map of requirements to matched courses.
      */
-    private static Map<Requirement, List<Course>> matchCoursesToRequirements(Plan plan, Summary summary, List<PlanList> planLists) {
+    private static Map<Requirement, List<Course>> matchCoursesToRequirements(Plan plan, Summary summary,
+            List<PlanList> planLists) {
         List<Course> courseList = getStudentCourses(summary);
 
-        // Initialize a map to store matched courses by requirements with their priorities
+        // Initialize a map to store matched courses by requirements with their
+        // priorities
         Map<Requirement, Map<Course, Priority>> requirementCoursePriorityMap = new HashMap<>();
 
-        // Iterate over the plan's requirements and try to match them with the student's courses
+        // Track which courses have already been assigned to a requirement
+        Set<Course> assignedCourses = new HashSet<>();
+
+        // Iterate over the plan's requirements and try to match them with the student's
+        // courses
         for (Category category : plan.getCategoryList()) {
             for (Requirement requirement : category.getRequirementList()) {
                 Map<Course, Priority> matchedCourses = new HashMap<>();
 
                 for (Course course : courseList) {
-                    // Skip failed courses
-                    if (course.priority == Priority.Failed) {
+                    // Skip failed courses and courses already assigned to another requirement
+                    if (course.priority == Priority.Failed || assignedCourses.contains(course)) {
                         continue;
                     }
 
                     // Check if the course matches the requirement (including PlanList requirements)
                     if (courseMatchesRequirement(course, requirement, planLists)) {
                         matchedCourses.put(course, course.priority);
+                        assignedCourses.add(course); // Mark the course as assigned
                     }
                 }
 
@@ -70,7 +78,8 @@ public class AuditFactory {
     /**
      * Solves the constraint satisfaction problem using priorities.
      *
-     * @param requirementCoursePriorityMap A map of requirements to courses with their priorities.
+     * @param requirementCoursePriorityMap A map of requirements to courses with
+     *                                     their priorities.
      * @return A map of requirements to matched courses.
      */
     private static Map<Requirement, List<Course>> solveWithPriorities(
