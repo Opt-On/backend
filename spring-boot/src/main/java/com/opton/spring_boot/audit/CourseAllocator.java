@@ -23,7 +23,7 @@ public class CourseAllocator {
      * @throws IllegalArgumentException If rows or cols are non-positive
      */
     public CourseAllocator(int rows, int cols) {
-        if (rows <= 0 || cols <= 0) {
+        if (rows < 0 || cols < 0) {
             throw new IllegalArgumentException("Rows and columns must be positive.");
         }
         this.rows = rows;

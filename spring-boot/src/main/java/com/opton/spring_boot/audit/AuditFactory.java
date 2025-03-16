@@ -3,52 +3,46 @@ package com.opton.spring_boot.audit;
 import com.opton.spring_boot.plan.dto.Category;
 import com.opton.spring_boot.plan.dto.Plan;
 import com.opton.spring_boot.plan.dto.Requirement;
+import com.opton.spring_boot.plan.dto.PlanList;
 import com.opton.spring_boot.transcript_parser.types.Summary;
 import com.opton.spring_boot.transcript_parser.types.TermSummary;
 
 import java.util.*;
 
 /**
- * AuditFactory produces an Audit for a given plan and student.
+ * AuditFactory produces an Audit for a given plan, student summary, and PlanLists.
  */
 public class AuditFactory {
 
     /**
-     * Generates an audit for the given plan and student summary.
+     * Generates an audit for the given plan, student summary, and PlanLists.
      *
-     * @param plan    The academic plan to audit.
-     * @param summary The student's academic summary.
+     * @param plan      The academic plan to audit.
+     * @param summary   The student's academic summary.
+     * @param planLists The list of PlanLists to use for flexible requirements.
      * @return An Audit object.
      */
-    public static Audit getAudit(Plan plan, Summary summary) {
+    public static Audit getAudit(Plan plan, Summary summary, List<PlanList> planLists) {
         // Match courses from the student summary to the requirements in the plan
-        Map<Requirement, List<Course>> requirementCourseListMap = matchCoursesToRequirements(plan, summary);
+        Map<Requirement, List<Course>> requirementCourseListMap = matchCoursesToRequirements(plan, summary, planLists);
         return new Audit(plan, requirementCourseListMap);
     }
 
     /**
      * Matches courses from the student's summary to the requirements in the plan.
      *
-     * @param plan    The academic plan.
-     * @param summary The student's academic summary.
+     * @param plan      The academic plan.
+     * @param summary   The student's academic summary.
+     * @param planLists The list of PlanLists to use for flexible requirements.
      * @return A map of requirements to matched courses.
      */
-    /**
-     * Matches courses from the student's summary to the requirements in the plan.
-     *
-     * @param plan    The academic plan.
-     * @param summary The student's academic summary.
-     * @return A map of requirements to matched courses.
-     */
-    private static Map<Requirement, List<Course>> matchCoursesToRequirements(Plan plan, Summary summary) {
+    private static Map<Requirement, List<Course>> matchCoursesToRequirements(Plan plan, Summary summary, List<PlanList> planLists) {
         List<Course> courseList = getStudentCourses(summary);
 
-        // Initialize a map to store matched courses by requirements with their
-        // priorities
+        // Initialize a map to store matched courses by requirements with their priorities
         Map<Requirement, Map<Course, Priority>> requirementCoursePriorityMap = new HashMap<>();
 
-        // Iterate over the plan's requirements and try to match them with the student's
-        // courses
+        // Iterate over the plan's requirements and try to match them with the student's courses
         for (Category category : plan.getCategoryList()) {
             for (Requirement requirement : category.getRequirementList()) {
                 Map<Course, Priority> matchedCourses = new HashMap<>();
@@ -59,7 +53,8 @@ public class AuditFactory {
                         continue;
                     }
 
-                    if (courseMatchesRequirement(course, requirement)) {
+                    // Check if the course matches the requirement (including PlanList requirements)
+                    if (courseMatchesRequirement(course, requirement, planLists)) {
                         matchedCourses.put(course, course.priority);
                     }
                 }
@@ -75,8 +70,7 @@ public class AuditFactory {
     /**
      * Solves the constraint satisfaction problem using priorities.
      *
-     * @param requirementCoursePriorityMap A map of requirements to courses with
-     *                                     their priorities.
+     * @param requirementCoursePriorityMap A map of requirements to courses with their priorities.
      * @return A map of requirements to matched courses.
      */
     private static Map<Requirement, List<Course>> solveWithPriorities(
@@ -162,12 +156,48 @@ public class AuditFactory {
      *
      * @param course      The course to check.
      * @param requirement The requirement to check against.
+     * @param planLists   The list of PlanLists to use for flexible requirements.
      * @return True if the course matches the requirement, false otherwise.
      */
-    private static boolean courseMatchesRequirement(Course course, Requirement requirement) {
+    private static boolean courseMatchesRequirement(Course course, Requirement requirement, List<PlanList> planLists) {
         String normalizedCourseCode = normalize(course.getSbj_list() + course.getCnbr_name());
         String normalizedRequirementCode = normalize(requirement.getSbj_list() + requirement.getCnbr_name());
 
+        // Check if the requirement is a PlanList
+        if (requirement.getSbj_list().equals("list")) {
+            String listName = requirement.getCnbr_name();
+            PlanList planList = findPlanListByName(listName, planLists);
+            if (planList != null) {
+                for (com.opton.spring_boot.plan.dto.Course listCourse : planList.getItems()) {
+                    String normalizedListCourseCode = normalize(listCourse.getSbj_list() + listCourse.getCnbr_name());
+                    if (normalizedCourseCode.equals(normalizedListCourseCode)) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        // Default case: direct match
         return normalizedCourseCode.equals(normalizedRequirementCode);
+    }
+
+    /**
+     * Finds a PlanList by its name.
+     *
+     * @param listName  The name of the PlanList to find.
+     * @param planLists The list of PlanLists to search.
+     * @return The PlanList object, or null if not found.
+     */
+    private static PlanList findPlanListByName(String listName, List<PlanList> planLists) {
+        if (planLists == null) {
+            return null;
+        }
+        for (PlanList planList : planLists) {
+            if (planList.getName().equals(listName)) {
+                return planList;
+            }
+        }
+        return null;
     }
 }

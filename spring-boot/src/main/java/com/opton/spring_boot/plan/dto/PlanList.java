@@ -7,8 +7,6 @@ import lombok.Getter;
 import java.util.Set;
 import java.util.TreeSet;
 
-import com.opton.spring_boot.audit.Course;
-
 import java.util.Comparator;
 
 @Data

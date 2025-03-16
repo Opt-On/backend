@@ -11,8 +11,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import com.opton.spring_boot.audit.Course;
 import com.opton.spring_boot.plan.dto.Category;
+import com.opton.spring_boot.plan.dto.Course;
 import com.opton.spring_boot.plan.dto.Plan;
 import com.opton.spring_boot.plan.dto.PlanList;
 import com.opton.spring_boot.plan.dto.Requirement;
