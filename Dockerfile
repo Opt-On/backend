@@ -8,12 +8,13 @@ COPY spring-boot/pom.xml .
 
 RUN mvn dependency:go-offline
 
-COPY spring-boot/ .
+# COPY spring-boot/ .
 
-# COPY spring-boot/.env .
+COPY .env .
+COPY firebase-key.json .
 
 # Copy the source code
-# COPY spring-boot/src ./src/
+COPY spring-boot/src ./src
 
 # Build the application
 RUN mvn clean package
@@ -24,12 +25,15 @@ FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
 # Copy the built JAR file from the build stage
-COPY --from=build /app/spring-boot/target/*.jar app.jar
+# COPY --from=build /app/target/opton.jar app.jar
+# COPY /app/target/opton.jar app.jar
 
 # Expose the app's port (default Spring Boot port is 8080)
-EXPOSE 8081
+# EXPOSE 8081
+EXPOSE 8080
+# RUN chmod +x app.jar
 
 # Run the app
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/target/opton.jar"]
 
 # ENTRYPOINT ["sh", "-c", "echo 'Container is running...'; tail -f /dev/null"]
