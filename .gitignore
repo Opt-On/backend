@@ -45,3 +45,7 @@ build/
 # Allow specific PDFs (whitelist)
 !transcript-simple.pdf
 !transcript-transfer.pdf
+
+# private/pub key
+*.pem
+*.pub
