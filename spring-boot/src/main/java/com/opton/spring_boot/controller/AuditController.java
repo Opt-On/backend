@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -92,8 +93,8 @@ public class AuditController {
         }
     }
 
-    @GetMapping("/option")
-    public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(@RequestParam("email") String email) {
+    @PostMapping("/option")
+    public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(@RequestHeader("email") String email) {
         try {
             DocumentSnapshot document = firestore.collection("user").document(email).get().get();
             if (!document.exists())
