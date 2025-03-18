@@ -1,24 +1,31 @@
-package com.opton.spring_boot.dto;
+package com.opton.spring_boot.plan.dto;
 
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Course requirements are grouped into named categories. A category
  * maintains a list of matches of course to requirement.
  */
 @Data
+@AllArgsConstructor
+@RequiredArgsConstructor
+@Getter
 public class Category implements Comparable<Category> {
-    private String name;
+    private final String name;
     private List<Requirement> requirementList = new ArrayList<>();
 
     /**
      * Add a requirement with null course to matches.
      * @param requirement requirement
-     */
+     */ 
     public void add(Requirement requirement) {
         requirementList.add(requirement);
     }
