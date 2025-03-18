@@ -1,6 +1,7 @@
 package com.opton.spring_boot.configuration;
 
 import java.io.FileInputStream;
+import java.util.List;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,11 +21,15 @@ public class FirestoreConfiguration {
     @Bean
     @SneakyThrows
     public FirebaseApp firebaseApp() {
+        List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
+        if (!firebaseApps.isEmpty()) {
+            return firebaseApps.get(0); 
+        }
         FileInputStream serviceAccount = new FileInputStream("firebase-key.json");
-        final var firebaseOptions = FirebaseOptions.builder()
-            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+ 		final var firebaseOptions = FirebaseOptions.builder()
+ 				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+ 				.build();
 
-            .build();
 
 		    return FirebaseApp.initializeApp(firebaseOptions);
     }
