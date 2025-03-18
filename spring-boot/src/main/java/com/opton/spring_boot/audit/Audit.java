@@ -22,7 +22,9 @@ public class Audit {
      * means that it will be complete if all in-progress courses are
      * passed.
      */
-    public enum Status { Unknown, Incomplete, Provisionally_Complete, Complete }
+    public enum Status {
+        Unknown, Incomplete, Provisionally_Complete, Complete
+    }
 
     // given as parameter at construction
     private final Plan plan;
@@ -39,7 +41,8 @@ public class Audit {
     /**
      * Constructor copies parameters, initializes the status map, and
      * calculates the status for each category and the overall audit.
-     * @param plan to be audited for
+     * 
+     * @param plan                     to be audited for
      * @param requirementCourseListMap map of requirements to matched courses
      */
     public Audit(Plan plan, Map<Requirement, List<Course>> requirementCourseListMap) {
@@ -53,6 +56,7 @@ public class Audit {
 
     /**
      * Calculate the status for each category and the overall audit.
+     * 
      * @return the overall status of the audit
      */
     private Status calculateStatuses() {
@@ -75,7 +79,32 @@ public class Audit {
     }
 
     /**
+     * Calculate the progress towards completing the plan.
+     * 
+     * @return # of unfufilled requirements / # of fulfilled requirements
+     */
+    public double calculateProgress() {
+        double completedCourses = 0;
+        double totalCourses = this.plan.size();
+
+        Map<Requirement, List<Course>> requirementCourseListMap = this.requirementCourseListMap;
+        for (Map.Entry<Requirement, List<Course>> entry : requirementCourseListMap.entrySet()) {
+            List<Course> courseList = entry.getValue();
+            totalCourses += courseList.size();
+
+            for (Course course : courseList) {
+                if (course.getPriority() != Priority.Failed) {
+                    completedCourses++;
+                }
+            }
+        }
+
+        return completedCourses / totalCourses;
+    }
+
+    /**
      * Calculate the status for a specific category.
+     * 
      * @param category the category to calculate the status for
      * @return the status of the category
      */
@@ -100,6 +129,7 @@ public class Audit {
 
     /**
      * Calculate the status for a specific requirement.
+     * 
      * @param courseList the list of courses matching the requirement
      * @return the status of the requirement
      */
@@ -114,6 +144,7 @@ public class Audit {
     /**
      * Return list of courses (usually length 1 or 0, sometimes more)
      * matching the given requirement.
+     * 
      * @param requirement the requirement to return matched courses for
      * @return list of courses matched to the requirement
      */
@@ -123,6 +154,7 @@ public class Audit {
 
     /**
      * Return the status of the audit for the given plan category.
+     * 
      * @param category of plan
      * @return the status of the category
      */

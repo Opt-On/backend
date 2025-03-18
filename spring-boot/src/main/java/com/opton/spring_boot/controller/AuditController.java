@@ -4,10 +4,18 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -53,12 +61,12 @@ public class AuditController {
         }
     }
 
-    @PostMapping("/whatif")
+    @GetMapping("/whatif")
     public ResponseEntity<Audit> handleWhatifAudit(
             @RequestParam("email") String email,
             @RequestParam("plan") String plan) {
         try {
-            DocumentSnapshot document = firestore.collection("user").document(email).get().get(); 
+            DocumentSnapshot document = firestore.collection("user").document(email).get().get();
 
             if (!document.exists()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -80,9 +88,58 @@ public class AuditController {
 
             return ResponseEntity.status(HttpStatus.OK).body(audit);
         } catch (Exception e) {
-            System.out.println("Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
+    @GetMapping("/option")
+    public ResponseEntity<List<Map.Entry<String, Double>>> handleAuditAllOptions(@RequestParam("email") String email) {
+        try {
+            DocumentSnapshot document = firestore.collection("user").document(email).get().get();
+            if (!document.exists())
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+
+            Summary summary = document.toObject(Summary.class);
+
+            URL resource = getClass().getClassLoader().getResource("option");
+            if (resource == null)
+                throw new FileNotFoundException("'option' folder not found");
+
+            Map<Audit, Double> auditMap = new HashMap<>();
+            File[] files = new File(resource.toURI()).listFiles((dir, name) -> name.endsWith(".csv"));
+            if (files != null) {
+                for (File file : files) {
+                    try (FileReader fileReader = new FileReader(file)) {
+                        PlanCSVParser parser = new PlanCSVParser();
+                        parser.csvIn(fileReader);
+                        Audit audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists());
+                        double score = audit.calculateProgress();
+                        auditMap.put(audit, score);
+                    } catch (Exception e) {
+                        System.err.println(e.getMessage());
+                    }
+                }
+            }
+
+            Set<String> planNamesSeen = new HashSet<>();
+            List<Map.Entry<String, Double>> topAudits = auditMap.entrySet().stream()
+                    .sorted((entry1, entry2) -> {
+                        int val = Double.compare(entry2.getValue(), entry1.getValue());
+                        if (val == 0) {
+                            return entry1.getKey().getPlan().getName().compareTo(entry2.getKey().getPlan().getName());
+                        }
+                        return val;
+                    })
+                    .filter(entry -> planNamesSeen.add(entry.getKey().getPlan().getName()))
+                    .limit(3)
+                    .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getPlan().getName(), entry.getValue()))
+                    .collect(Collectors.toList());
+
+            return ResponseEntity.ok(topAudits);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }
