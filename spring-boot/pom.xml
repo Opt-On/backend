@@ -80,10 +80,16 @@
 			<scope>runtime</scope>
 			<optional>true</optional>
 		</dependency>
+		<dependency>
+			<groupId>io.github.cdimascio</groupId>
+			<artifactId>dotenv-java</artifactId>
+			<version>3.0.0</version>
+		</dependency>
 	</dependencies>
 	
 
 	<build>
+		<finalName>opton</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

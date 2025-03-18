@@ -37,6 +37,7 @@ build/
 .vscode/
 
 *firebase-key.json
+.env
 
 #pdf
 *.pdf

@@ -36,10 +36,10 @@ public class TranscriptService {
     }
 
     @Async
-    public CompletableFuture<String> setTranscript(Summary summary, Boolean includeGrade) {
+    public CompletableFuture<String> setTranscript(Summary summary, Boolean includeGrade, String email) {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                DocumentReference docRef = firestore.collection("user").document(String.valueOf(summary.studentNumber));
+                DocumentReference docRef = firestore.collection("user").document(String.valueOf(email));
                 
                 // bypass adding grade info
                 if (!includeGrade){
