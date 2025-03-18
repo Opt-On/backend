@@ -141,9 +141,11 @@ public class AuditFactory {
 
         // Iterate through each term and extract courses
         for (TermSummary termSummary : summary.termSummaries) {
-            for (var courseEntry : termSummary.courses) {
-                Course course = new Course(courseEntry.getKey(), courseEntry.getValue());
-                courseList.add(course);
+            for (var c : termSummary.courses) {
+                for (Map.Entry<String, String> courseEntry : c.entrySet()) {
+                    Course course = new Course(courseEntry.getKey(), courseEntry.getValue());
+                    courseList.add(course);
+                }
             }
         }
 

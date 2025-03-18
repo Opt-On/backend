@@ -1,7 +1,7 @@
 package com.opton.spring_boot.transcript_parser.types;
 
 import java.util.ArrayList;
-import java.util.Map.Entry;
+import java.util.Map;
 
 public class TermSummary {
     // Term ids are numbers of the form 1189 (Fall 2018)
@@ -11,6 +11,6 @@ public class TermSummary {
     public String level;
 
     // using map for now, have serialization errors with custom class that i dont wanna deal with
-    public ArrayList<Entry<String, String>> courses;
+    public ArrayList<Map<String, String>> courses;
 }
 
