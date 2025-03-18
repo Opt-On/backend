@@ -1,12 +1,12 @@
-package com.opton.spring_boot.dto;
+package com.opton.spring_boot.plan.dto;
 
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
+
 public class Requirement implements Comparable<Requirement> {
     private String sbj_list;
     private String cnbr_name;
-    private int number = -1;
 
     public Requirement(String sbj_list, String cnbr_name) {
         this.sbj_list = sbj_list;
@@ -15,7 +15,7 @@ public class Requirement implements Comparable<Requirement> {
 
     @Override
     public int compareTo(Requirement requirement) {
-        return this.number - requirement.number;
+        return this.cnbr_name.compareTo(requirement.cnbr_name);
     }
 
     @Override

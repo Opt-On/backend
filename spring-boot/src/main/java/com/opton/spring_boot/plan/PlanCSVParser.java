@@ -1,4 +1,4 @@
-package com.opton.spring_boot;
+package com.opton.spring_boot.plan;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,13 +9,17 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.opton.spring_boot.dto.Plan;
-import com.opton.spring_boot.dto.PlanList;
-import com.opton.spring_boot.dto.Requirement;
-import com.opton.spring_boot.dto.ListItem;
+import org.springframework.stereotype.Component;
+
+import com.opton.spring_boot.plan.dto.Category;
+import com.opton.spring_boot.plan.dto.Course;
+import com.opton.spring_boot.plan.dto.Plan;
+import com.opton.spring_boot.plan.dto.PlanList;
+import com.opton.spring_boot.plan.dto.Requirement;
 
 @Getter
 @Setter
+@Component
 public class PlanCSVParser {
     private List<Plan> plans = new ArrayList<>();
     private List<PlanList> lists = new ArrayList<>();
@@ -46,26 +50,25 @@ public class PlanCSVParser {
             String curType = "";
             String curCategory = "";
             
-            // Skip the header line
             bufferedReader.readLine();
 
             while ((line = bufferedReader.readLine()) != null) {
-                String[] values = line.split(",", -1); // Split by comma, preserving empty fields
+                String[] values = line.split(",", -1);
 
                 if (values.length < 6) {
-                    continue; // Skip invalid lines
+                    continue; 
                 }
 
                 String type = values[0].trim();
                 if (!type.isEmpty()) {
                     curType = type;
                     String name = values[1].trim();
-                    int calendar = Integer.parseInt(values[2].trim());
+                    int year = Integer.parseInt(values[2].trim());
 
                     if (type.equals("list")) {
-                        lists.add(new PlanList(name, calendar));
+                        lists.add(new PlanList(name, year));
                     } else if (type.equals("plan")) {
-                        plans.add(new Plan(name, calendar));
+                        plans.add(new Plan(name, year));
                     }
                 }
 
@@ -97,9 +100,9 @@ public class PlanCSVParser {
         for (Plan plan : plans) {
             String rowType = "plan";
             String rowName = plan.getName();
-            String rowCal = Integer.toString(plan.getCalendar());
+            String rowCal = Integer.toString(plan.getYear());
             String rowCat = "";
-            for (Plan.Category c : plan.getCategoryList()) {
+            for (Category c : plan.getCategoryList()) {
                 rowCat = c.getName();
                 for (Requirement r : c.getRequirementList()) {
                     csv.append(rowType).append(","); rowType = "";
@@ -116,9 +119,9 @@ public class PlanCSVParser {
         for (PlanList list : lists) {
             String rowType = "list";
             String rowName = list.getName();
-            String rowCal = Integer.toString(list.getCalendar());
+            String rowCal = Integer.toString(list.getYear());
             String rowCat = "";
-            for (ListItem li : list.getItems()) {
+            for (Course li : list.getItems()) {
                 csv.append(rowType).append(","); rowType = "";
                 csv.append(rowName).append(","); rowName = "";
                 csv.append(rowCal).append(","); rowCal = "";

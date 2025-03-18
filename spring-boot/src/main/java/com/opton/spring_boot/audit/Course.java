@@ -1,0 +1,50 @@
+package com.opton.spring_boot.audit;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+@Getter
+@AllArgsConstructor
+public class Course implements Comparable<Course> {
+    private String sbj_list;
+    private String cnbr_name;
+    public Priority priority;
+
+    public Course(String courseName, String priorityStr) {
+        String[] parts = courseName.split(" ", 2);
+        this.sbj_list = parts[0];
+        this.cnbr_name = parts[1];
+        this.priority = getPriority(priorityStr);
+    }
+
+    private Priority getPriority(String priorityStr) {
+        if (priorityStr.equals("CR")) {
+            return Priority.Passed;
+        } else if (priorityStr.equals("In Progress") || priorityStr.equals("NG")) {
+            return Priority.InProgress;
+        } else {
+            try {
+                int value = Integer.parseInt(priorityStr);
+                if (value >= 50) {
+                    return Priority.Passed;
+                } else {
+                    return Priority.Failed;
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid priority string: " + priorityStr);
+            }
+        }
+
+    }
+
+    @Override
+    public int compareTo(Course other) {
+        int result = this.sbj_list.compareTo(other.sbj_list);
+        return result != 0 ? result : this.cnbr_name.compareTo(other.cnbr_name);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s %s", this.sbj_list, this.cnbr_name).toUpperCase();
+    }
+}

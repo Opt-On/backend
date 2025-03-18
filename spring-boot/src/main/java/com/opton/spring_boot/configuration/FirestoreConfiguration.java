@@ -30,16 +30,17 @@ public class FirestoreConfiguration {
  				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
  				.build();
 
-		return FirebaseApp.initializeApp(firebaseOptions);
+
+		    return FirebaseApp.initializeApp(firebaseOptions);
     }
 
     @Bean
-    public Firestore firestore(final FirebaseApp firebaseApp){
+    public Firestore firestore(final FirebaseApp firebaseApp) {
         return FirestoreClient.getFirestore(firebaseApp);
     }
 
     @Bean
-	public FirebaseAuth firebaseAuth(final FirebaseApp firebaseApp) {
-		return FirebaseAuth.getInstance(firebaseApp);
-	}
+    public FirebaseAuth firebaseAuth(final FirebaseApp firebaseApp) {
+        return FirebaseAuth.getInstance(firebaseApp);
+    }
 }

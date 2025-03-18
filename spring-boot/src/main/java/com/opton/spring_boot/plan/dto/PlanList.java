@@ -1,22 +1,21 @@
-package com.opton.spring_boot.dto;
+package com.opton.spring_boot.plan.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 import lombok.Getter;
 
 import java.util.Set;
 import java.util.TreeSet;
+
 import java.util.Comparator;
 
 @Data
-@RequiredArgsConstructor
 @Getter
-@ToString
+@AllArgsConstructor
 public class PlanList implements Comparable<PlanList> {
     private final String name;
-    private final int calendar;
-    private final Set<ListItem> items = new TreeSet<>(); // Lists don't have duplicate items
+    private final int year;
+    private final Set<Course> items = new TreeSet<>(); 
 
     /**
      * Compares this PlanList to another for ordering.
@@ -27,18 +26,18 @@ public class PlanList implements Comparable<PlanList> {
     @Override
     public int compareTo(PlanList other) {
         return Comparator.comparing(PlanList::getName)
-                .thenComparing(PlanList::getCalendar)
+                .thenComparing(PlanList::getYear)
                 .compare(this, other);
     }
 
     /**
-     * Adds a new ListItem to the PlanList.
+     * Adds a new Course to the PlanList.
      *
      * @param sbj_list The subject list of the item.
      * @param cnbr_name The course number name of the item.
      */
     public void add(String sbj_list, String cnbr_name) {
-        items.add(new ListItem(sbj_list, cnbr_name));
+        items.add(new Course(sbj_list, cnbr_name));
     }
 
     /**
