@@ -1,8 +1,6 @@
 package com.opton.spring_boot.configuration;
 
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.List;
+import java.io.FileInputStream;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,7 +12,6 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.cloud.FirestoreClient;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.SneakyThrows;
 
 @Configuration
