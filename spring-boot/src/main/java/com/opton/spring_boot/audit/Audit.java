@@ -83,7 +83,7 @@ public class Audit {
      * 
      * @return # of unfufilled requirements / # of fulfilled requirements
      */
-    public double calculateProgress() {
+    public double[] calculateProgress() {
         double completedCourses = 0;
         double totalCourses = this.plan.size();
 
@@ -99,7 +99,7 @@ public class Audit {
             }
         }
 
-        return completedCourses / totalCourses;
+        return new double[] { completedCourses, totalCourses };
     }
 
     /**

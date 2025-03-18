@@ -93,7 +93,7 @@ public class AuditController {
     }
 
     @GetMapping("/option")
-    public ResponseEntity<List<Map.Entry<String, Double>>> handleAuditAllOptions(@RequestParam("email") String email) {
+    public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(@RequestParam("email") String email) {
         try {
             DocumentSnapshot document = firestore.collection("user").document(email).get().get();
             if (!document.exists())
@@ -105,7 +105,7 @@ public class AuditController {
             if (resource == null)
                 throw new FileNotFoundException("'option' folder not found");
 
-            Map<Audit, Double> auditMap = new HashMap<>();
+            Map<Audit, double[]> auditMap = new HashMap<>();
             File[] files = new File(resource.toURI()).listFiles((dir, name) -> name.endsWith(".csv"));
             if (files != null) {
                 for (File file : files) {
@@ -113,8 +113,8 @@ public class AuditController {
                         PlanCSVParser parser = new PlanCSVParser();
                         parser.csvIn(fileReader);
                         Audit audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists());
-                        double score = audit.calculateProgress();
-                        auditMap.put(audit, score);
+                        double[] scores = audit.calculateProgress();
+                        auditMap.put(audit, scores);
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
                     }
@@ -122,20 +122,20 @@ public class AuditController {
             }
 
             Set<String> planNamesSeen = new HashSet<>();
-            List<Map.Entry<String, Double>> topAudits = auditMap.entrySet().stream()
-                    .sorted((entry1, entry2) -> {
-                        int val = Double.compare(entry2.getValue(), entry1.getValue());
-                        if (val == 0) {
-                            return entry1.getKey().getPlan().getName().compareTo(entry2.getKey().getPlan().getName());
-                        }
-                        return val;
-                    })
-                    .filter(entry -> planNamesSeen.add(entry.getKey().getPlan().getName()))
-                    .limit(3)
-                    .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getPlan().getName(), entry.getValue()))
-                    .collect(Collectors.toList());
+            List<Map.Entry<String, double[]>> topAudits = auditMap.entrySet().stream()
+                .sorted((entry1, entry2) -> {
+                    int val = Double.compare(entry2.getValue()[0] / entry2.getValue()[1], entry1.getValue()[0] / entry1.getValue()[1]);
+                    if (val == 0) {
+                        return entry1.getKey().getPlan().getName().compareTo(entry2.getKey().getPlan().getName());
+                    }
+                    return val;
+                })
+                .filter(entry -> planNamesSeen.add(entry.getKey().getPlan().getName()))
+                .limit(3)
+                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getPlan().getName(), entry.getValue()))
+                .collect(Collectors.toList());
 
-            return ResponseEntity.ok(topAudits);
+        return ResponseEntity.ok(topAudits);
 
         } catch (Exception e) {
             e.printStackTrace();
