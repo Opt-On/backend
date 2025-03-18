@@ -29,7 +29,6 @@ WORKDIR /app
 # COPY /app/target/opton.jar app.jar
 
 # Expose the app's port (default Spring Boot port is 8080)
-# EXPOSE 8081
 EXPOSE 8080
 # RUN chmod +x app.jar
 

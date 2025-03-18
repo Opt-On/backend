@@ -23,43 +23,12 @@ public class FirestoreConfiguration {
     public FirebaseApp firebaseApp() {
         List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
         if (!firebaseApps.isEmpty()) {
-            return firebaseApps.get(0); // Return existing instance
+            return firebaseApps.get(0); 
         }
-        // Dotenv dotenv = Dotenv.load();
-        
-        // String privateKey = dotenv.get("FIREBASE_PRIVATE_KEY").replace("\\n", "\n");
-        // String privateKeyId = dotenv.get("FIREBASE_PRIVATE_KEY_ID");
-        // String clientEmail = dotenv.get("FIREBASE_CLIENT_EMAIL");
-        // String projectId = dotenv.get("FIREBASE_PROJECT_ID");
-        // String clientId = dotenv.get("FIREBASE_CLIENT_ID");
-
-        // GoogleCredentials credentials = GoogleCredentials.fromStream(new ByteArrayInputStream((
-        //     "{"
-        //         + "\"type\": \"service_account\","
-        //         + "\"project_id\": \"" + projectId + "\","
-        //         + "\"private_key_id\": \"" + privateKeyId +  "\","
-        //         + "\"private_key\": \"" + privateKey + "\","
-        //         + "\"client_email\": \"" + clientEmail + "\","
-        //         + "\"client_id\": \"" + clientId + "\","
-        //         + "\"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\","
-        //         + "\"token_uri\": \"https://oauth2.googleapis.com/token\","
-        //         + "\"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\","
-        //         + "\"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40opton-5596f.iam.gserviceaccount.com\","
-        //         + "\"universe_domain\": \"googleapis.com\""
-        //         + "}"
-        // ).getBytes(StandardCharsets.UTF_8)));
-                
-        // FirebaseOptions firebaseOptions = FirebaseOptions.builder()
-        //     .setCredentials(credentials)
-        //     .build();
-
-        // use json
-
         FileInputStream serviceAccount = new FileInputStream("firebase-key.json");
-
-        final var firebaseOptions = FirebaseOptions.builder()
-            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-            .build();
+ 		final var firebaseOptions = FirebaseOptions.builder()
+ 				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
+ 				.build();
 
 		return FirebaseApp.initializeApp(firebaseOptions);
     }
