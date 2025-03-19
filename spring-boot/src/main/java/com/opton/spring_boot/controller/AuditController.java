@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -93,7 +94,8 @@ public class AuditController {
         }
     }
 
-    @PostMapping("/option")
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PostMapping("/options")
     public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(@RequestHeader("email") String email) {
         try {
             DocumentSnapshot document = firestore.collection("user").document(email).get().get();
