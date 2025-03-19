@@ -4,21 +4,31 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
+import java.util.AbstractMap;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
 import com.opton.spring_boot.audit.Audit;
 import com.opton.spring_boot.audit.AuditFactory;
 import com.opton.spring_boot.plan.PlanCSVParser;
-// import com.opton.spring_boot.plan.dto.Plan;
-// import com.opton.spring_boot.plan.dto.Requirement;
 import com.opton.spring_boot.transcript_parser.TranscriptParser;
 import com.opton.spring_boot.transcript_parser.types.Summary;
 
@@ -26,13 +36,13 @@ import com.opton.spring_boot.transcript_parser.types.Summary;
 @RequestMapping("/audit")
 public class AuditController {
 
-    @PostMapping("/degree")
-    public ResponseEntity<Audit> handleDegreeAudit(@RequestParam("transcript") MultipartFile file) {
-        try {
-            // Plan plan = getPlan();
-            Summary summary = TranscriptParser.ParseTranscript(file);
+    @Autowired
+    private Firestore firestore;
 
-            // PlanCSVParser parser = new PlanCSVParser();
+    @PostMapping("/declared")
+    public ResponseEntity<Audit> handleDeclaredAudit(@RequestParam("transcript") MultipartFile file) {
+        try {
+            Summary summary = TranscriptParser.ParseTranscript(file);
 
             URL resource = getClass().getClassLoader().getResource("ME2023-test.csv");
             if (resource == null) {
@@ -53,61 +63,86 @@ public class AuditController {
         }
     }
 
-    @GetMapping("/option")
-    public ResponseEntity<Audit> handleOptionAudit() {
-        return ResponseEntity.status(HttpStatus.OK).body(null);
+    @GetMapping("/whatif")
+    public ResponseEntity<Audit> handleWhatifAudit(
+            @RequestParam("email") String email,
+            @RequestParam("plan") String plan) {
+        try {
+            DocumentSnapshot document = firestore.collection("user").document(email).get().get();
+
+            if (!document.exists()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            Summary summary = document.toObject(Summary.class);
+
+            URL resource = getClass().getClassLoader().getResource(plan);
+            if (resource == null) {
+                throw new FileNotFoundException("File not found in classpath");
+            }
+            File csvFile = new File(resource.toURI());
+            FileReader fileReader = new FileReader(csvFile);
+
+            PlanCSVParser parser = new PlanCSVParser();
+            parser.csvIn(fileReader);
+
+            Audit audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists());
+
+            return ResponseEntity.status(HttpStatus.OK).body(audit);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
-    // private Plan getPlan() {
-    // Plan plan = new Plan("ME", 2023);
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PostMapping("/options")
+    public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(@RequestHeader("email") String email) {
+        try {
+            DocumentSnapshot document = firestore.collection("user").document(email).get().get();
+            if (!document.exists())
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 
-    // // 1A Term
-    // plan.add("1A", new Requirement("CS", "145"));
-    // plan.add("1A", new Requirement("MATH", "145"));
-    // plan.add("1A", new Requirement("MATH", "147"));
-    // plan.add("1A", new Requirement("PSYCH", "101"));
-    // plan.add("1A", new Requirement("SPCOM", "223"));
+            Summary summary = document.toObject(Summary.class);
 
-    // // 1B Term
-    // plan.add("1B", new Requirement("CS", "146"));
-    // plan.add("1B", new Requirement("ECE", "142"));
-    // plan.add("1B", new Requirement("ME", "115"));
-    // plan.add("1B", new Requirement("ME", "123"));
+            URL resource = getClass().getClassLoader().getResource("option");
+            if (resource == null)
+                throw new FileNotFoundException("'option' folder not found");
 
-    // // 2A Term
-    // plan.add("2A", new Requirement("ME", "201"));
-    // plan.add("2A", new Requirement("ME", "202"));
-    // plan.add("2A", new Requirement("ME", "219"));
-    // plan.add("2A", new Requirement("ME", "230"));
-    // plan.add("2A", new Requirement("ME", "269"));
+            Map<Audit, double[]> auditMap = new HashMap<>();
+            File[] files = new File(resource.toURI()).listFiles((dir, name) -> name.endsWith(".csv"));
+            if (files != null) {
+                for (File file : files) {
+                    try (FileReader fileReader = new FileReader(file)) {
+                        PlanCSVParser parser = new PlanCSVParser();
+                        parser.csvIn(fileReader);
+                        Audit audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists());
+                        double[] scores = audit.calculateProgress();
+                        auditMap.put(audit, scores);
+                    } catch (Exception e) {
+                        System.err.println(e.getMessage());
+                    }
+                }
+            }
 
-    // // 2B Term
-    // plan.add("2B", new Requirement("ME", "203"));
-    // plan.add("2B", new Requirement("ME", "212"));
-    // plan.add("2B", new Requirement("ME", "220"));
-    // plan.add("2B", new Requirement("ME", "250"));
-    // plan.add("2B", new Requirement("ME", "262"));
+            Set<String> planNamesSeen = new HashSet<>();
+            List<Map.Entry<String, double[]>> topAudits = auditMap.entrySet().stream()
+                .sorted((entry1, entry2) -> {
+                    int val = Double.compare(entry2.getValue()[0] / entry2.getValue()[1], entry1.getValue()[0] / entry1.getValue()[1]);
+                    if (val == 0) {
+                        return entry1.getKey().getPlan().getName().compareTo(entry2.getKey().getPlan().getName());
+                    }
+                    return val;
+                })
+                .filter(entry -> planNamesSeen.add(entry.getKey().getPlan().getName()))
+                .limit(3)
+                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getPlan().getName(), entry.getValue()))
+                .collect(Collectors.toList());
 
-    // // 3A Term
-    // plan.add("3A", new Requirement("ME", "303"));
-    // plan.add("3A", new Requirement("ME", "321"));
-    // plan.add("3A", new Requirement("ME", "340"));
-    // plan.add("3A", new Requirement("ME", "351"));
-    // plan.add("3A", new Requirement("ME", "354"));
+        return ResponseEntity.ok(topAudits);
 
-    // // 3B Term
-    // plan.add("3B", new Requirement("ME", "322"));
-    // plan.add("3B", new Requirement("ME", "353"));
-    // plan.add("3B", new Requirement("ME", "360"));
-    // plan.add("3B", new Requirement("ME", "362"));
-    // plan.add("3B", new Requirement("ME", "380"));
-    // plan.add("3B", new Requirement("MSCI", "261"));
-
-    // // 4A Term
-    // plan.add("4A", new Requirement("ME", "481"));
-
-    // // 4B Term
-    // plan.add("4B", new Requirement("ME", "482"));
-    // return plan;
-    // }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 }

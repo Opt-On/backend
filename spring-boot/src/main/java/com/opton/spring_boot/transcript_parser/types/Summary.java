@@ -9,7 +9,7 @@ public class Summary {
     public String firstName;
     public String lastName;
     public String programName;
-    public String[] optionNames;
+    public ArrayList<String> optionNames;
     public String uploadDate;
     public ArrayList<TermSummary> termSummaries;
 } 
