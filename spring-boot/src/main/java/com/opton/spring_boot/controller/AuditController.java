@@ -13,10 +13,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -63,40 +64,64 @@ public class AuditController {
         }
     }
 
-    @GetMapping("/whatif")
-    public ResponseEntity<Audit> handleWhatifAudit(
-            @RequestParam("email") String email,
-            @RequestParam("plan") String plan) {
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PostMapping("/whatif")
+    public ResponseEntity<Audit> handleWhatifAudit(@RequestHeader("email") String email,
+            @RequestHeader("option") String option) {
         try {
             DocumentSnapshot document = firestore.collection("user").document(email).get().get();
-
-            if (!document.exists()) {
+            if (!document.exists())
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-            }
 
             Summary summary = document.toObject(Summary.class);
 
-            URL resource = getClass().getClassLoader().getResource(plan);
-            if (resource == null) {
-                throw new FileNotFoundException("File not found in classpath");
+            Map<String, String> optionMap = new HashMap<String, String>() {
+                {
+                    put("COGSCOPT", "COGSCOPT2012.csv");
+                    put("COMPENGOPT", "COMPENGOPT2024.csv");
+                    put("MSCIOPT", "MSCIOPT2023.csv");
+                    put("BIOMECHOPT", "BIOMECHOPT2023.csv");
+                    put("BUSOPT", "BUSOPT2011.csv");
+                    put("SWENGOPT", "SWENGOPT2024.csv");
+                    put("ENTROPT", "ENTROPT2023.csv");
+                    put("AIENGOPT", "AIENGOPT2023.csv");
+                    put("COMPUOPT", "COMPUOPT2024.csv");
+                    put("STATOPT", "STATOPT2023.csv");
+                    put("MATHOPT", "MATHOPT2017.csv");
+                    put("MECTROPT", "MECTROPT2023.csv");
+                }
+            };
+
+            Audit audit = null;
+
+            if (summary != null) {
+                // degree
+                Resource resource = new ClassPathResource("option/" + optionMap.get(option));
+                if (!resource.exists()) {
+                    throw new FileNotFoundException("file not found: option/" + optionMap.get(option));
+                }
+
+                try (FileReader fileReader = new FileReader(resource.getFile())) {
+                    PlanCSVParser parser = new PlanCSVParser();
+                    parser.csvIn(fileReader);
+
+                    audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists());
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+                }
             }
-            File csvFile = new File(resource.toURI());
-            FileReader fileReader = new FileReader(csvFile);
-
-            PlanCSVParser parser = new PlanCSVParser();
-            parser.csvIn(fileReader);
-
-            Audit audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists());
-
             return ResponseEntity.status(HttpStatus.OK).body(audit);
         } catch (Exception e) {
+            System.out.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/options")
-    public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(@RequestHeader("email") String email) {
+    public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(
+            @RequestHeader("email") String email) {
         try {
             DocumentSnapshot document = firestore.collection("user").document(email).get().get();
             if (!document.exists())
@@ -126,19 +151,20 @@ public class AuditController {
 
             Set<String> planNamesSeen = new HashSet<>();
             List<Map.Entry<String, double[]>> topAudits = auditMap.entrySet().stream()
-                .sorted((entry1, entry2) -> {
-                    int val = Double.compare(entry2.getValue()[0] / entry2.getValue()[1], entry1.getValue()[0] / entry1.getValue()[1]);
-                    if (val == 0) {
-                        return entry1.getKey().getPlan().getName().compareTo(entry2.getKey().getPlan().getName());
-                    }
-                    return val;
-                })
-                .filter(entry -> planNamesSeen.add(entry.getKey().getPlan().getName()))
-                .limit(3)
-                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getPlan().getName(), entry.getValue()))
-                .collect(Collectors.toList());
+                    .sorted((entry1, entry2) -> {
+                        int val = Double.compare(entry2.getValue()[0] / entry2.getValue()[1],
+                                entry1.getValue()[0] / entry1.getValue()[1]);
+                        if (val == 0) {
+                            return entry1.getKey().getPlan().getName().compareTo(entry2.getKey().getPlan().getName());
+                        }
+                        return val;
+                    })
+                    .filter(entry -> planNamesSeen.add(entry.getKey().getPlan().getName()))
+                    .limit(3)
+                    .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getPlan().getName(), entry.getValue()))
+                    .collect(Collectors.toList());
 
-        return ResponseEntity.ok(topAudits);
+            return ResponseEntity.ok(topAudits);
 
         } catch (Exception e) {
             e.printStackTrace();
