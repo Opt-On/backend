@@ -115,7 +115,7 @@ public class AuditController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
     @PostMapping("/options")
     public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(
             @RequestHeader("email") String email) {
