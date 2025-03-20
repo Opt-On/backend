@@ -21,22 +21,28 @@ public class FirestoreConfiguration {
     @Bean
     @SneakyThrows
     public FirebaseApp firebaseApp() {
-        List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
-        if (!firebaseApps.isEmpty()) {
-            return firebaseApps.get(0); 
+        synchronized (this) {
+            List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
+            if (!firebaseApps.isEmpty()) {
+                System.err.println("OLD FIRESTORE INSTANCE");
+                return firebaseApps.get(0); 
+            }
+            FileInputStream serviceAccount = new FileInputStream("firebase-key.json");
+            final var firebaseOptions = FirebaseOptions.builder()
+                    .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                    .build();
+
+            return FirebaseApp.initializeApp(firebaseOptions);
         }
-        FileInputStream serviceAccount = new FileInputStream("firebase-key.json");
- 		final var firebaseOptions = FirebaseOptions.builder()
- 				.setCredentials(GoogleCredentials.fromStream(serviceAccount))
- 				.build();
-
-
-		    return FirebaseApp.initializeApp(firebaseOptions);
     }
 
     @Bean
     public Firestore firestore(final FirebaseApp firebaseApp) {
-        return FirestoreClient.getFirestore(firebaseApp);
+        Firestore firestore = FirestoreClient.getFirestore(firebaseApp);
+
+
+
+        return firestore;
     }
 
     @Bean

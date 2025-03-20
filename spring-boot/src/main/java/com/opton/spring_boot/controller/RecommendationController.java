@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +15,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.opton.spring_boot.transcript_parser.types.Summary;
+
 @RestController
 @RequestMapping("/recommendation")
 public class RecommendationController {
     private static WebClient webClient = WebClient.create("http://18.222.23.64:8008");
-
     private static final Set<String> OPTIONS = Set.of(
         "Artificial Intelligence Option",
         "Biomechanics Option",
@@ -35,6 +39,16 @@ public class RecommendationController {
         "Statistics Option"
     );
 
+    // private final Firestore firestore;
+
+    // // constructor injection
+    // public RecommendationController(Firestore firestore) {
+    //     this.firestore = firestore;
+    // }
+
+    @Autowired
+    private Firestore firestore;
+
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/")
     public ResponseEntity<String> handleFileUpload(@RequestParam("email") String email, @RequestParam("option") String optionName) {
@@ -43,9 +57,19 @@ public class RecommendationController {
         }
 
         try {
+            DocumentSnapshot document = firestore.collection("user").document(email).get().get();
+
+            if (!document.exists()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            }
+
+            System.err.println(document.toObject(Summary.class));
+
             Map<String, Object> requestBody = new HashMap<>();
+            // todo: 
             // map program to code
             // parse term
+            // get all passed/ inprogress courses
             requestBody.put("program", "CHEM");
             requestBody.put("courses", List.of("CS101", "CS102", "MATH201"));
             requestBody.put("term", "1A");
@@ -59,11 +83,10 @@ public class RecommendationController {
                 .bodyToMono(String.class)
                 .block();
 
-            System.out.println("response");
-            System.out.println(response);
             return ResponseEntity.status(HttpStatus.OK).body(response);
 
         } catch (Exception e) {
+            System.err.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
