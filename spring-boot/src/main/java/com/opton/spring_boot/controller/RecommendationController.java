@@ -23,6 +23,7 @@ import com.opton.spring_boot.transcript_parser.types.TermSummary;
 @RestController
 @RequestMapping("/recommendation")
 public class RecommendationController {
+
     private static WebClient webClient = WebClient.create("http://18.222.23.64:8008");
     private static final Set<String> OPTIONS = Set.of(
         "Artificial Intelligence Option",
@@ -67,7 +68,7 @@ public class RecommendationController {
                 for (TermSummary termSummary: summary.termSummaries){
                     for (Map<String, String> map : termSummary.courses) {
                         for (String key: map.keySet()){
-                            if (map.get(key) == "In Progress"){
+                            if (map.get(key) == "In Progress" || map.get(key) == "CR"){
                                 courses.add(key);
                             }
                             try {
