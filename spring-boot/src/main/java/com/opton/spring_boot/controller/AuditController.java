@@ -77,17 +77,14 @@ public class AuditController {
 
             Map<String, String> optionMap = new HashMap<String, String>() {
                 {
-                    put("COGSCOPT", "COGSCOPT2012.csv");
                     put("COMPENGOPT", "COMPENGOPT2024.csv");
                     put("MSCIOPT", "MSCIOPT2023.csv");
                     put("BIOMECHOPT", "BIOMECHOPT2023.csv");
-                    put("BUSOPT", "BUSOPT2011.csv");
                     put("SWENGOPT", "SWENGOPT2024.csv");
                     put("ENTROPT", "ENTROPT2023.csv");
                     put("AIENGOPT", "AIENGOPT2023.csv");
                     put("COMPUOPT", "COMPUOPT2024.csv");
                     put("STATOPT", "STATOPT2023.csv");
-                    put("MATHOPT", "MATHOPT2017.csv");
                     put("MECTROPT", "MECTROPT2023.csv");
                 }
             };
