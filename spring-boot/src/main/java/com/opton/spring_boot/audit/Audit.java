@@ -85,12 +85,10 @@ public class Audit {
      */
     public double[] calculateProgress() {
         double completedCourses = 0;
-        double totalCourses = this.plan.size();
 
         Map<Requirement, List<Course>> requirementCourseListMap = this.requirementCourseListMap;
         for (Map.Entry<Requirement, List<Course>> entry : requirementCourseListMap.entrySet()) {
             List<Course> courseList = entry.getValue();
-            totalCourses += courseList.size();
 
             for (Course course : courseList) {
                 if (course.getPriority() != Priority.Failed) {
@@ -99,7 +97,7 @@ public class Audit {
             }
         }
 
-        return new double[] { completedCourses, totalCourses };
+        return new double[] { completedCourses, this.plan.size() };
     }
 
     /**
