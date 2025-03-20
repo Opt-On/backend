@@ -115,7 +115,7 @@ public class AuditController {
         }
     }
 
-    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
+    @CrossOrigin(origins = { "http://localhost:3000", "https://opton.ca" })
     @PostMapping("/options")
     public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(
             @RequestHeader("email") String email) {
@@ -131,9 +131,25 @@ public class AuditController {
                 throw new FileNotFoundException("'option' folder not found");
 
             Map<Audit, double[]> auditMap = new HashMap<>();
-            File[] files = new File(resource.toURI()).listFiles((dir, name) -> name.endsWith(".csv"));
-            if (files != null) {
-                for (File file : files) {
+
+            Map<String, String> optionMap = new HashMap<String, String>() {
+                {
+                    put("COMPENGOPT", "COMPENGOPT2024.csv");
+                    put("MSCIOPT", "MSCIOPT2023.csv");
+                    put("BIOMECHOPT", "BIOMECHOPT2023.csv");
+                    put("SWENGOPT", "SWENGOPT2024.csv");
+                    put("ENTROPT", "ENTROPT2023.csv");
+                    put("AIENGOPT", "AIENGOPT2023.csv");
+                    put("COMPUOPT", "COMPUOPT2024.csv");
+                    put("STATOPT", "STATOPT2023.csv");
+                    put("MECTROPT", "MECTROPT2023.csv");
+                }
+            };
+
+            for (Map.Entry<String, String> entry : optionMap.entrySet()) {
+                String fileName = entry.getValue();
+                File file = new File(resource.getPath() + "/" + fileName);
+                if (file.exists()) {
                     try (FileReader fileReader = new FileReader(file)) {
                         PlanCSVParser parser = new PlanCSVParser();
                         parser.csvIn(fileReader);
@@ -143,6 +159,8 @@ public class AuditController {
                     } catch (Exception e) {
                         System.err.println(e.getMessage());
                     }
+                } else {
+                    System.err.println("file not found: " + fileName);
                 }
             }
 
