@@ -182,9 +182,12 @@ public class TranscriptParser {
                 }
                 // check if course is graded (i.e not in currently in progress)
                 if (l < completedCoursesMatches.size()
-                        && text.substring(courseMatches.get(j)[2], courseMatches.get(j)[3])
-                                .equals(text.substring(completedCoursesMatches.get(l)[2],
-                                        completedCoursesMatches.get(l)[3]))) {
+                    && text.substring(
+                        courseMatches.get(j)[2], courseMatches.get(j)[3])
+                        .equals(
+                            text.substring(completedCoursesMatches.get(l)[2],
+                            completedCoursesMatches.get(l)[3]))
+                    ){
                     l++;
                 } else {
                     grade = "In Progress";

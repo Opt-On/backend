@@ -1,6 +1,6 @@
 package com.opton.spring_boot.controller;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -18,6 +18,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.opton.spring_boot.transcript_parser.types.Summary;
+import com.opton.spring_boot.transcript_parser.types.TermSummary;
 
 @RestController
 @RequestMapping("/recommendation")
@@ -52,7 +53,7 @@ public class RecommendationController {
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/")
     public ResponseEntity<String> handleFileUpload(@RequestParam("email") String email, @RequestParam("option") String optionName) {
-        if (OPTIONS.contains(optionName)){
+        if (!OPTIONS.contains(optionName)){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
@@ -63,17 +64,38 @@ public class RecommendationController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
             }
 
-            System.err.println(document.toObject(Summary.class));
-
             Map<String, Object> requestBody = new HashMap<>();
-            // todo: 
-            // map program to code
-            // parse term
-            // get all passed/ inprogress courses
-            requestBody.put("program", "CHEM");
-            requestBody.put("courses", List.of("CS101", "CS102", "MATH201"));
-            requestBody.put("term", "1A");
+            
+            Summary summary = document.toObject(Summary.class);
+            String term;
+            ArrayList<String> courses = new ArrayList<>();
+            if (summary != null && summary.termSummaries.size() > 0){
+                term = summary.termSummaries.get(summary.termSummaries.size() - 1).level;
+                for (TermSummary termSummary: summary.termSummaries){
+                    for (Map<String, String> map : termSummary.courses) {
+                        for (String key: map.keySet()){
+                            if (map.get(key) == "In Progress"){
+                                courses.add(key);
+                            }
+                            try {
+                                int grade = Integer.parseInt(map.get(key)); // Try converting to an integer
+                                if (grade > 50) {
+                                    courses.add(key);
+                                }
+                            } catch (NumberFormatException e) {
+                                // Ignore non-integer values
+                            }
+                        }
+                    }
+                }
+            }
+            else{
+                term = "1A";
+            }
 
+            requestBody.put("program", summary != null && summary.programName != null ? summary.programName : "null");
+            requestBody.put("courses", courses);
+            requestBody.put("term", term);
 
             String response = webClient.post()
                 .uri("/recommendations")
