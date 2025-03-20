@@ -24,7 +24,6 @@ public class FirestoreConfiguration {
         synchronized (this) {
             List<FirebaseApp> firebaseApps = FirebaseApp.getApps();
             if (!firebaseApps.isEmpty()) {
-                System.err.println("OLD FIRESTORE INSTANCE");
                 return firebaseApps.get(0); 
             }
             FileInputStream serviceAccount = new FileInputStream("firebase-key.json");

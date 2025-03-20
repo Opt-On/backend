@@ -40,13 +40,6 @@ public class RecommendationController {
         "Statistics Option"
     );
 
-    // private final Firestore firestore;
-
-    // // constructor injection
-    // public RecommendationController(Firestore firestore) {
-    //     this.firestore = firestore;
-    // }
-
     @Autowired
     private Firestore firestore;
 
@@ -65,7 +58,7 @@ public class RecommendationController {
             }
 
             Map<String, Object> requestBody = new HashMap<>();
-            
+
             Summary summary = document.toObject(Summary.class);
             String term;
             ArrayList<String> courses = new ArrayList<>();
