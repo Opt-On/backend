@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URL;
 import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -13,6 +14,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -22,14 +25,12 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.opton.spring_boot.audit.Audit;
 import com.opton.spring_boot.audit.AuditFactory;
 import com.opton.spring_boot.plan.PlanCSVParser;
-import com.opton.spring_boot.transcript_parser.TranscriptParser;
 import com.opton.spring_boot.transcript_parser.types.Summary;
 
 @RestController
@@ -40,23 +41,96 @@ public class AuditController {
     private Firestore firestore;
 
     @PostMapping("/declared")
-    public ResponseEntity<Audit> handleDeclaredAudit(@RequestParam("transcript") MultipartFile file) {
+    public ResponseEntity<List<Audit>> handleDeclaredAudit(@RequestHeader("email") String email) {
         try {
-            Summary summary = TranscriptParser.ParseTranscript(file);
+            DocumentSnapshot document = firestore.collection("user").document(email).get().get();
+            if (!document.exists())
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 
-            URL resource = getClass().getClassLoader().getResource("ME2023-test.csv");
-            if (resource == null) {
-                throw new FileNotFoundException("File not found in classpath");
+            Summary summary = document.toObject(Summary.class);
+
+            Map<String, String> degreeMap = new HashMap<String, String>() {
+                {
+                    put("Computer Science", "AE2018.csv"); // FAKE 
+                    put("Aerospace Engineering", "AE2018.csv");
+                    put("Chemical Engineering", "CHE2023.csv");
+                    put("Computer Engineering", "COMPE2023.csv");
+                    put("Electrical Engineering", "ELE2023.csv");
+                    put("Mechanical Engineering", "ME2023.csv");
+                    put("Mechatronics Engineering", "MECTR2023.csv");
+                    put("Management Engineering", "MGTE2023.csv");
+                    put("Nanotechnology Engineering", "NE2018.csv");
+                    put("Software Engineering", "SE2023.csv");
+                    put("Architectural Engineering", "ARCHPPENG2017.csv");
+                    put("Civil Engineering", "CIVE2017.csv");
+                    put("Environmental Engineering", "ENVE2017.csv");
+                    put("Geological Engineering", "GEOE2017.csv");
+                    put("Systems Design Engineering", "SYDE2017.csv");
+                }
+            };
+
+            Map<String, String> optionMap = new HashMap<String, String>() {
+                {
+                    put("Digital Hardware Option", "COGSCOPT2012.csv"); // FAKE
+                    put("Cognitive Science Option", "COGSCOPT2012.csv");
+                    put("Computer Engineering Option", "COMPENGOPT2024.csv");
+                    put("Management Science Option", "MSCIOPT2023.csv");
+                    put("Biomechanics Option", "BIOMECHOPT2023.csv");
+                    put("Business Option", "BUSOPT2011.csv");
+                    put("Software Engineering Option", "SWENGOPT2024.csv");
+                    put("Entrepreneurship Option", "ENTROPT2023.csv");
+                    put("Artificial Intelligence Option", "AIENGOPT2023.csv");
+                    put("Computing Option", "COMPUOPT2024.csv");
+                    put("Statistics Option", "STATOPT2023.csv");
+                    put("Mathematics Option", "MATHOPT2017.csv");
+                    put("Mechatronics Option", "MECTROPT2023.csv");
+                }
+            };
+
+            List<Audit> audits = new ArrayList<>();
+
+            if (summary != null) {
+                // degree
+                Resource resource = new ClassPathResource("degree/" + degreeMap.get(summary.programName));
+                if (!resource.exists()) {
+                    throw new FileNotFoundException("file not found: degree/" + degreeMap.get(summary.programName));
+                }
+
+                try (FileReader fileReader = new FileReader(resource.getFile())) {
+                    PlanCSVParser parser = new PlanCSVParser();
+                    parser.csvIn(fileReader);
+
+                    Audit audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists());
+
+                    audits.add(audit);
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+                }
+
+                // options
+                for (String option : summary.optionNames) {
+                    Resource optionResource = new ClassPathResource("option/" + optionMap.get(option));
+                    if (!optionResource.exists()) {
+                        throw new FileNotFoundException("file not found: option/" + optionMap.get(option));
+                    }
+    
+                    try (FileReader fileReader = new FileReader(optionResource.getFile())) {
+                        PlanCSVParser parser = new PlanCSVParser();
+                        parser.csvIn(fileReader);
+    
+                        Audit audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists());
+    
+                        audits.add(audit);
+                    } catch (Exception e) {
+                        System.err.println(e.getMessage());
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+                    }
+                }
+                
             }
-            File csvFile = new File(resource.toURI());
-            FileReader fileReader = new FileReader(csvFile);
 
-            PlanCSVParser parser = new PlanCSVParser();
-            parser.csvIn(fileReader);
-
-            Audit audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists());
-
-            return ResponseEntity.status(HttpStatus.OK).body(audit);
+            return ResponseEntity.status(HttpStatus.OK).body(audits);
         } catch (Exception e) {
             System.out.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
@@ -96,7 +170,8 @@ public class AuditController {
 
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/options")
-    public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(@RequestHeader("email") String email) {
+    public ResponseEntity<List<Map.Entry<String, double[]>>> handleAuditAllOptions(
+            @RequestHeader("email") String email) {
         try {
             DocumentSnapshot document = firestore.collection("user").document(email).get().get();
             if (!document.exists())
@@ -126,19 +201,20 @@ public class AuditController {
 
             Set<String> planNamesSeen = new HashSet<>();
             List<Map.Entry<String, double[]>> topAudits = auditMap.entrySet().stream()
-                .sorted((entry1, entry2) -> {
-                    int val = Double.compare(entry2.getValue()[0] / entry2.getValue()[1], entry1.getValue()[0] / entry1.getValue()[1]);
-                    if (val == 0) {
-                        return entry1.getKey().getPlan().getName().compareTo(entry2.getKey().getPlan().getName());
-                    }
-                    return val;
-                })
-                .filter(entry -> planNamesSeen.add(entry.getKey().getPlan().getName()))
-                .limit(3)
-                .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getPlan().getName(), entry.getValue()))
-                .collect(Collectors.toList());
+                    .sorted((entry1, entry2) -> {
+                        int val = Double.compare(entry2.getValue()[0] / entry2.getValue()[1],
+                                entry1.getValue()[0] / entry1.getValue()[1]);
+                        if (val == 0) {
+                            return entry1.getKey().getPlan().getName().compareTo(entry2.getKey().getPlan().getName());
+                        }
+                        return val;
+                    })
+                    .filter(entry -> planNamesSeen.add(entry.getKey().getPlan().getName()))
+                    .limit(3)
+                    .map(entry -> new AbstractMap.SimpleEntry<>(entry.getKey().getPlan().getName(), entry.getValue()))
+                    .collect(Collectors.toList());
 
-        return ResponseEntity.ok(topAudits);
+            return ResponseEntity.ok(topAudits);
 
         } catch (Exception e) {
             e.printStackTrace();
