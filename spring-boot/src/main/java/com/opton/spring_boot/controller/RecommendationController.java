@@ -10,8 +10,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -46,8 +46,10 @@ public class RecommendationController {
 
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/")
-    public ResponseEntity<String> handleFileUpload(@RequestParam("email") String email, @RequestParam("option") String optionName) {
+    public ResponseEntity<String> handleFileUpload(@RequestHeader("email") String email, @RequestHeader("option") String optionName) {
         if (!OPTIONS.contains(optionName)){
+            System.out.println(optionName);
+            System.err.println("bad option");
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
 
@@ -85,6 +87,11 @@ public class RecommendationController {
             }
             else{
                 term = "1A";
+            }
+
+            // hacky fix for MSCI -> MSE
+            for (int i = 0; i < courses.size(); i++) {
+                courses.set(i, courses.get(i).replace("MSCI", "MSE"));
             }
 
             requestBody.put("program", summary != null && summary.programName != null ? summary.programName : "null");
