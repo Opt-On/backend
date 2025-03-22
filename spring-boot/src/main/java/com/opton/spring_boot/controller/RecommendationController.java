@@ -97,12 +97,7 @@ public class RecommendationController {
             requestBody.put("program", summary != null && summary.programName != null ? summary.programName : "null");
             requestBody.put("courses", courses);
             requestBody.put("term", term);
-
-            System.err.println("courses");
-            System.err.println(courses);
-
-
-
+            
             String response = webClient.post()
                 .uri("/recommendations")
                 .contentType(MediaType.APPLICATION_JSON)
