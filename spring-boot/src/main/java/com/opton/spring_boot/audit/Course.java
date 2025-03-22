@@ -22,6 +22,8 @@ public class Course implements Comparable<Course> {
             return Priority.Passed;
         } else if (priorityStr.equals("In Progress") || priorityStr.equals("NG")) {
             return Priority.InProgress;
+        } else if (priorityStr.equals("NC")) {
+            return Priority.Failed;
         } else {
             try {
                 int value = Integer.parseInt(priorityStr);
