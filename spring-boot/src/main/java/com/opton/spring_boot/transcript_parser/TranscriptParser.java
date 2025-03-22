@@ -100,7 +100,6 @@ public class TranscriptParser {
         try (PDDocument document = PDDocument.load(file.getInputStream())) {
             PDFTextStripper pdfStripper = new PDFTextStripper();
             String text = pdfStripper.getText(document);
-            System.out.println(text);
             // System.err.println(text);
             return text;
         } catch (IOException e) {
@@ -150,6 +149,8 @@ public class TranscriptParser {
         int j = 0; // courseMatches
         int k = 0; // courseResultMatches
         int l = 0; // completedCoursesMatches
+
+        // terms
         for (int i = 0; i < termMatches.size(); i++) {
             String season = text.substring(termMatches.get(i)[2], termMatches.get(i)[3]);
             String year = text.substring(termMatches.get(i)[4], termMatches.get(i)[5]);
@@ -191,7 +192,12 @@ public class TranscriptParser {
                     ){
                     l++;
                 } else {
-                    grade = "In Progress";
+                    // handle missing courses
+                    if (i == termMatches.size() - 1){
+                        grade = "In Progress";
+                    } else {
+                        grade = "CR";
+                    }
                 }
 
                 Map<String, String> courseMap = new HashMap<>();
