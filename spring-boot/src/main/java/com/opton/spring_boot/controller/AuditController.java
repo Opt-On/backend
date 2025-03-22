@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.google.cloud.firestore.DocumentSnapshot;
@@ -39,6 +38,7 @@ public class AuditController {
     @Autowired
     private Firestore firestore;
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/declared")
     public ResponseEntity<List<Audit>> handleDeclaredAudit(@RequestHeader("email") String email) {
         try {
@@ -74,6 +74,7 @@ public class AuditController {
                     put("Cognitive Science Option", "COGSCOPT2012.csv");
                     put("Computer Engineering Option", "COMPENGOPT2024.csv");
                     put("Management Science Option", "MSCIOPT2023.csv");
+                    put("Management Sciences Option", "MSCIOPT2023.csv");
                     put("Biomechanics Option", "BIOMECHOPT2023.csv");
                     put("Business Option", "BUSOPT2011.csv");
                     put("Software Engineering Option", "SWENGOPT2024.csv");
@@ -111,6 +112,7 @@ public class AuditController {
                 for (String option : summary.optionNames) {
                     Resource optionResource = new ClassPathResource("option/" + optionMap.get(option));
                     if (!optionResource.exists()) {
+                        System.out.println("option" + option);
                         throw new FileNotFoundException("file not found: option/" + optionMap.get(option));
                     }
     
@@ -199,6 +201,7 @@ public class AuditController {
             Summary summary = document.toObject(Summary.class);
 
             URL resource = getClass().getClassLoader().getResource("option");
+
             if (resource == null)
                 throw new FileNotFoundException("'option' folder not found");
 
@@ -232,7 +235,7 @@ public class AuditController {
                         System.err.println(e.getMessage());
                     }
                 } else {
-                    System.err.println("file not found: " + fileName);
+                    System.err.println("file not found: " + fileName + entry);
                 }
             }
 
