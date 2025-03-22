@@ -27,7 +27,7 @@ public class TranscriptParser {
     private static Pattern termRegex = Pattern.compile("(?m)^\\s*(Fall|Winter|Spring)\\s+(\\d{4})\\s*$");
     private static Pattern studentNameRegex = Pattern.compile("Name:\\s+([^\\n]+)");
     private static Pattern courseResultRegex = Pattern
-            .compile("([A-Z]{2,})\\s{2,}(\\d{1,3}\\w*)\\s+.*?(\\d\\.\\d{2})\\s*(\\d\\.\\d{2})\\s*(\\d{1,3}|CR|NC|NG)");
+            .compile("(?s)([A-Z]{2,})\\s{2,}(\\d{1,3}\\w*)\\s+.*?(\\d\\.\\d{2})\\s*(\\d\\.\\d{2})\\s*(\\d{1,3}|CR|NC|NG)", Pattern.MULTILINE | Pattern.DOTALL);
     private static Pattern completedCourseRegex = Pattern
             .compile("([A-Z]{2,})\\s{2,}(\\d{1,3}\\w*)\\s{1,}.*(\\d\\.\\d{2}).*\\n");
 
@@ -149,6 +149,8 @@ public class TranscriptParser {
         int j = 0; // courseMatches
         int k = 0; // courseResultMatches
         int l = 0; // completedCoursesMatches
+
+        // terms
         for (int i = 0; i < termMatches.size(); i++) {
             String season = text.substring(termMatches.get(i)[2], termMatches.get(i)[3]);
             String year = text.substring(termMatches.get(i)[4], termMatches.get(i)[5]);
@@ -190,7 +192,12 @@ public class TranscriptParser {
                     ){
                     l++;
                 } else {
-                    grade = "In Progress";
+                    // handle missing courses
+                    if (i == termMatches.size() - 1){
+                        grade = "In Progress";
+                    } else {
+                        grade = "CR";
+                    }
                 }
 
                 Map<String, String> courseMap = new HashMap<>();
