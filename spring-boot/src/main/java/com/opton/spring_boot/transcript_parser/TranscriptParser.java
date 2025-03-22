@@ -27,7 +27,7 @@ public class TranscriptParser {
     private static Pattern termRegex = Pattern.compile("(?m)^\\s*(Fall|Winter|Spring)\\s+(\\d{4})\\s*$");
     private static Pattern studentNameRegex = Pattern.compile("Name:\\s+([^\\n]+)");
     private static Pattern courseResultRegex = Pattern
-            .compile("([A-Z]{2,})\\s{2,}(\\d{1,3}\\w*)\\s+.*?(\\d\\.\\d{2})\\s*(\\d\\.\\d{2})\\s*(\\d{1,3}|CR|NC|NG)");
+            .compile("(?s)([A-Z]{2,})\\s{2,}(\\d{1,3}\\w*)\\s+.*?(\\d\\.\\d{2})\\s*(\\d\\.\\d{2})\\s*(\\d{1,3}|CR|NC|NG)", Pattern.MULTILINE | Pattern.DOTALL);
     private static Pattern completedCourseRegex = Pattern
             .compile("([A-Z]{2,})\\s{2,}(\\d{1,3}\\w*)\\s{1,}.*(\\d\\.\\d{2}).*\\n");
 
@@ -100,6 +100,7 @@ public class TranscriptParser {
         try (PDDocument document = PDDocument.load(file.getInputStream())) {
             PDFTextStripper pdfStripper = new PDFTextStripper();
             String text = pdfStripper.getText(document);
+            System.out.println(text);
             // System.err.println(text);
             return text;
         } catch (IOException e) {
