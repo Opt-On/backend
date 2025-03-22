@@ -70,7 +70,7 @@ public class RecommendationController {
                 for (TermSummary termSummary: summary.termSummaries){
                     for (Map<String, String> map : termSummary.courses) {
                         for (String key: map.keySet()){
-                            if (map.get(key) == "In Progress" || map.get(key) == "CR"){
+                            if (map.get(key).equals("In Progress") || map.get(key).equals("CR")){
                                 courses.add(key);
                             }
                             try {
@@ -97,7 +97,7 @@ public class RecommendationController {
             requestBody.put("program", summary != null && summary.programName != null ? summary.programName : "null");
             requestBody.put("courses", courses);
             requestBody.put("term", term);
-
+            
             String response = webClient.post()
                 .uri("/recommendations")
                 .contentType(MediaType.APPLICATION_JSON)
