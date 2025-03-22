@@ -21,16 +21,13 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.opton.spring_boot.audit.Audit;
 import com.opton.spring_boot.audit.AuditFactory;
 import com.opton.spring_boot.plan.PlanCSVParser;
-import com.opton.spring_boot.transcript_parser.TranscriptParser;
 import com.opton.spring_boot.transcript_parser.types.Summary;
 
 @RestController
@@ -40,11 +37,16 @@ public class AuditController {
     @Autowired
     private Firestore firestore;
 
+    @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/declared")
-    public ResponseEntity<Audit> handleDeclaredAudit(@RequestParam("transcript") MultipartFile file) {
+    public ResponseEntity<Audit> handleDeclaredAudit(@RequestHeader("email") String email) {
         try {
-            Summary summary = TranscriptParser.ParseTranscript(file);
+            DocumentSnapshot document = firestore.collection("user").document(email).get().get();
+            if (!document.exists())
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 
+            Summary summary = document.toObject(Summary.class);
+            
             URL resource = getClass().getClassLoader().getResource("ME2023-test.csv");
             if (resource == null) {
                 throw new FileNotFoundException("File not found in classpath");
