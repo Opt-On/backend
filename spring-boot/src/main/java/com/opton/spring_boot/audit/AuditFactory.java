@@ -26,37 +26,46 @@ public class AuditFactory {
         return requirementCountMap;
     }
 
-    private static Map<Requirement, List<Course>> matchCoursesToRequirements(Plan plan, Summary summary, List<PlanList> planLists) {
+    private static Map<Requirement, List<Course>> matchCoursesToRequirements(Plan plan, Summary summary,
+            List<PlanList> planLists) {
         List<Course> courseList = getStudentCourses(summary);
         Map<Requirement, List<Course>> requirementCourseMap = new HashMap<>();
         Set<Course> assignedCourses = new HashSet<>();
         Map<Requirement, Integer> requirementCountMap = countRequirementOccurrences(plan);
-    
+
         for (Category category : plan.getCategoryList()) {
             for (Requirement requirement : category.getRequirementList()) {
-                List<Course> coursesForRequirement = requirementCourseMap.computeIfAbsent(requirement, k -> new ArrayList<>());
-    
+                List<Course> coursesForRequirement = requirementCourseMap.computeIfAbsent(requirement,
+                        k -> new ArrayList<>());
+
                 if (coursesForRequirement.size() >= requirementCountMap.get(requirement)) {
                     continue;
                 }
-    
+
+                List<Course> matchingCourses = new ArrayList<>();
                 for (Course course : courseList) {
                     if (course.priority == Priority.Failed || assignedCourses.contains(course)) {
                         continue;
                     }
-    
+
                     if (courseMatchesRequirement(course, requirement, planLists)) {
-                        coursesForRequirement.add(course);
-                        assignedCourses.add(course);
-    
-                        if (coursesForRequirement.size() >= requirementCountMap.get(requirement)) {
-                            break;
-                        }
+                        matchingCourses.add(course);
                     }
+                }
+
+                matchingCourses.sort(Comparator.comparing(Course::getPriority).reversed());
+
+                for (Course course : matchingCourses) {
+                    if (coursesForRequirement.size() >= requirementCountMap.get(requirement)) {
+                        break;
+                    }
+
+                    coursesForRequirement.add(course);
+                    assignedCourses.add(course);
                 }
             }
         }
-    
+
         return requirementCourseMap;
     }
 
