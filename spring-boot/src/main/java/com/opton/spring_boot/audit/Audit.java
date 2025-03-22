@@ -89,15 +89,22 @@ public class Audit {
         if (courseList == null || courseList.isEmpty()) {
             return Status.Incomplete;
         }
-
+    
         int validCourseCount = 0;
+        boolean hasInProgress = false;
+    
         for (Course course : courseList) {
+            if (course.getPriority() == Priority.InProgress) {
+                hasInProgress = true;
+            }
             if (course.getPriority() != Priority.Failed) {
                 validCourseCount++;
             }
         }
-
-        if (validCourseCount >= requiredCount) {
+    
+        if (hasInProgress) {
+            return Status.Provisionally_Complete;
+        } else if (validCourseCount >= requiredCount) {
             return Status.Complete;
         } else {
             return Status.Incomplete;

@@ -61,7 +61,7 @@ public class AuditFactory {
                     }
 
                     coursesForRequirement.add(course);
-                    assignedCourses.add(course);
+                    assignedCourses.add(course);    
                 }
             }
         }
