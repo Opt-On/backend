@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.net.URL;
 import java.util.AbstractMap;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +31,7 @@ import com.opton.spring_boot.audit.Audit;
 import com.opton.spring_boot.audit.AuditFactory;
 import com.opton.spring_boot.plan.PlanCSVParser;
 import com.opton.spring_boot.transcript_parser.types.Summary;
+import com.opton.spring_boot.transcript_parser.types.TermSummary;
 
 @RestController
 @RequestMapping("/audit")
@@ -48,29 +50,38 @@ public class AuditController {
 
             Summary summary = document.toObject(Summary.class);
 
-            Map<String, String> degreeMap = new HashMap<String, String>() {
+            String year = "";
+            if (summary != null) {
+                for (TermSummary termSummary : summary.termSummaries) {
+                    if (termSummary.level.equals("1A")) { 
+                        String yearString = Integer.toString(termSummary.termId);
+                        year = "20" + yearString.substring(1, yearString.length() - 1);
+                    }
+                }
+            }
+            
+            Map<String, List<String>> degreeMap = new HashMap<>() {
                 {
-                    put("Computer Science", "AE2018.csv"); // FAKE 
-                    put("Aerospace Engineering", "AE2018.csv");
-                    put("Chemical Engineering", "CHE2023.csv");
-                    put("Computer Engineering", "COMPE2023.csv");
-                    put("Electrical Engineering", "ELE2023.csv");
-                    put("Mechanical Engineering", "ME2023.csv");
-                    put("Mechatronics Engineering", "MECTR2023.csv");
-                    put("Management Engineering", "MGTE2023.csv");
-                    put("Nanotechnology Engineering", "NE2018.csv");
-                    put("Software Engineering", "SE2023.csv");
-                    put("Architectural Engineering", "ARCHPPENG2017.csv");
-                    put("Civil Engineering", "CIVE2017.csv");
-                    put("Environmental Engineering", "ENVE2017.csv");
-                    put("Geological Engineering", "GEOE2017.csv");
-                    put("Systems Design Engineering", "SYDE2017.csv");
+                    put("Aerospace Engineering", List.of("AE2018.csv"));
+                    put("Biomedical Engineering", List.of("BIOMEDE2017.csv"));
+                    put("Chemical Engineering", List.of("CHE2020.csv", "CHE2021.csv", "CHE2022.csv", "CHE2023.csv"));
+                    put("Computer Engineering", List.of("COMPE2020.csv", "COMPE2021.csv", "COMPE2022.csv", "COMPE2023.csv"));
+                    put("Electrical Engineering", List.of("ELE2020.csv", "ELE2021.csv", "ELE2022.csv", "ELE2023.csv"));
+                    put("Mechanical Engineering", List.of("ME2020.csv", "ME2021.csv", "ME2022.csv", "ME2023.csv"));
+                    put("Mechatronics Engineering", List.of("MECTR2020.csv", "MECTR2021.csv", "MECTR2022.csv", "MECTR2023.csv"));
+                    put("Management Engineering", List.of("MGTE2020.csv", "MGTE2021.csv", "MGTE2022.csv", "MGTE2023.csv"));
+                    put("Nanotechnology Engineering", List.of("NE2018.csv"));
+                    put("Software Engineering", List.of("SE2020.csv", "SE2021.csv", "SE2022.csv", "SE2023.csv"));
+                    put("Architectural Engineering", List.of("ARCHPPENG2017.csv"));
+                    put("Civil Engineering", List.of("CIVE2017.csv"));
+                    put("Environmental Engineering", List.of("ENVE2017.csv"));
+                    put("Geological Engineering", List.of("GEOE2017.csv"));
+                    put("Systems Design Engineering", List.of("SYDE2017.csv"));
                 }
             };
 
             Map<String, String> optionMap = new HashMap<String, String>() {
                 {
-                    put("Digital Hardware Option", "COGSCOPT2012.csv"); // FAKE
                     put("Cognitive Science Option", "COGSCOPT2012.csv");
                     put("Computer Engineering Option", "COMPENGOPT2024.csv");
                     put("Management Science Option", "MSCIOPT2023.csv");
@@ -91,9 +102,15 @@ public class AuditController {
 
             if (summary != null) {
                 // degree
-                Resource resource = new ClassPathResource("degree/" + degreeMap.get(summary.programName));
+                String degreeFile = getRelevantDegreeFile(degreeMap, summary.programName, year);
+
+                if (degreeFile == null) {
+                    throw new FileNotFoundException("no valid file found: " + summary.programName);
+                }
+
+                Resource resource = new ClassPathResource("degree/" + degreeFile);
                 if (!resource.exists()) {
-                    throw new FileNotFoundException("file not found: degree/" + degreeMap.get(summary.programName));
+                    throw new FileNotFoundException("file not found: degree/" + degreeFile);
                 }
 
                 try (FileReader fileReader = new FileReader(resource.getFile())) {
@@ -101,7 +118,6 @@ public class AuditController {
                     parser.csvIn(fileReader);
 
                     Audit audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists());
-
                     audits.add(audit);
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
@@ -136,6 +152,29 @@ public class AuditController {
             System.out.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    private String getRelevantDegreeFile(Map<String, List<String>> degreeMap, String programName, String year) {
+        List<String> files = degreeMap.get(programName);
+        if (files == null || files.isEmpty()) return null;
+    
+        List<String> sortedFiles = files.stream()
+                .sorted(Comparator.comparingInt(f -> Integer.parseInt(f.replaceAll("\\D+", ""))))
+                .collect(Collectors.toList());
+    
+        if (year.isEmpty()) {
+            return sortedFiles.get(sortedFiles.size() - 1);
+        }
+    
+        int yearInt = Integer.parseInt(year);
+        for (String file : sortedFiles) {
+            int fileYear = Integer.parseInt(file.replaceAll("\\D+", ""));
+            if (fileYear <= yearInt) {
+                return file; 
+            }
+        }
+    
+        return sortedFiles.get(sortedFiles.size() - 1);
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
