@@ -90,6 +90,37 @@ public class TranscriptParser {
         return summary;
     }
 
+        public static Summary ParseTranscriptText(String transcriptData) throws Exception {
+        // System.out.println(transcriptData);
+        ArrayList<TermSummary> termSummaries = extractTermSummaries(transcriptData);
+        int studentNumber = extractStudentNumber(transcriptData);
+        String programName = extractProgramName(transcriptData);
+        String studentName = extractStudentName(transcriptData);
+
+        Summary summary = new Summary();
+        summary.studentNumber = studentNumber;
+        summary.termSummaries = termSummaries;
+        String[] nameParts = studentName.split(", ");
+        summary.lastName = nameParts[0];
+        summary.firstName = nameParts.length > 1 ? nameParts[1] : "bozo";
+
+        String[] programParts = programName.trim().split("/\\s*");
+        summary.programName = programParts[0];
+
+        if (programParts.length > 1) {
+            summary.optionNames = new ArrayList<>(
+                    Arrays.asList(Arrays.copyOfRange(programParts, 1, programParts.length)));
+        }
+
+        summary.uploadDate = LocalDate.now().format(DateTimeFormatter.ofPattern("MM/dd/yyyy"));
+
+        System.out.println(programName);
+        System.out.println(studentNumber);
+        System.out.println(studentName);
+
+        return summary;
+    }
+
     @SuppressWarnings("null")
     public static String PDFToText(MultipartFile file) throws Exception {
         if (file.isEmpty() || !file.getOriginalFilename().endsWith(".pdf")) {
