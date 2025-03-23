@@ -1,5 +1,6 @@
 package com.opton.spring_boot.controller;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,24 @@ public class TranscriptController {
 
         try {
             Summary summary = TranscriptParser.ParseTranscript(file);
+            transcriptService.setTranscript(summary, includeGrade, email);
+            return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PostMapping("/upload/text")
+    public ResponseEntity<String> handleTextTranscriptUpload(@RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "true") boolean includeGrade, @RequestParam("email") String email) {
+        if (file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+
+        try {
+            String text = new String(file.getBytes(), StandardCharsets.UTF_8);
+            Summary summary = TranscriptParser.ParseTranscriptText(text);
             transcriptService.setTranscript(summary, includeGrade, email);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
