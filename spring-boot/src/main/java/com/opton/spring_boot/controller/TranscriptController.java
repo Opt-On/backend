@@ -43,7 +43,8 @@ public class TranscriptController {
 
         try {
             Summary summary = TranscriptParser.ParseTranscript(file);
-            transcriptService.setTranscript(summary, includeGrade, email);
+            // transcriptService.setTranscript(summary, includeGrade, email);
+            transcriptService.setTranscriptSync(summary, includeGrade, email); // blocking
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
             System.err.println(e.getMessage());
@@ -76,7 +77,7 @@ public class TranscriptController {
         try {
             Summary summary = request.summary;
             String email = request.email;
-            transcriptService.setTranscript(summary, true, email);
+            transcriptService.setTranscriptSync(summary, true, email);
             return ResponseEntity.status(HttpStatus.OK).body("File uploaded successfully");
         } catch (Exception e) {
             System.err.println(e.getMessage());
