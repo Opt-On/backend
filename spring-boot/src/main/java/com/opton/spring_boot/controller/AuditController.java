@@ -276,29 +276,6 @@ public class AuditController {
         }
     }
 
-    private String getRelevantDegreeFile(Map<String, List<String>> degreeMap, String programName, String year) {
-        List<String> files = degreeMap.get(programName);
-        if (files == null || files.isEmpty()) return null;
-    
-        List<String> sortedFiles = files.stream()
-                .sorted(Comparator.comparingInt(f -> Integer.parseInt(f.replaceAll("\\D+", ""))))
-                .collect(Collectors.toList());
-    
-        if (year.isEmpty()) {
-            return sortedFiles.get(sortedFiles.size() - 1);
-        }
-    
-        int yearInt = Integer.parseInt(year);
-        for (String file : sortedFiles) {
-            int fileYear = Integer.parseInt(file.replaceAll("\\D+", ""));
-            if (fileYear <= yearInt) {
-                return file; 
-            }
-        }
-    
-        return sortedFiles.get(sortedFiles.size() - 1);
-    }
-
     @CrossOrigin(origins = "http://localhost:3000")
     @PostMapping("/whatif")
     public ResponseEntity<Audit> handleWhatifAudit(@RequestHeader("email") String email,
