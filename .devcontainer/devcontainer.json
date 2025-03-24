@@ -8,7 +8,7 @@
   "features": {
     "ghcr.io/devcontainers-extra/features/springboot-sdkman:2": {}
   },
-  "forwardPorts": ["443:8080"] // Expose backend to the host
+  "forwardPorts": ["443:443"] // Expose backend to the host
 
   // Features to add to the dev container. More info: https://containers.dev/features.
   // "features": {}
