@@ -1,5 +1,7 @@
 package com.opton.spring_boot.audit;
 
+import java.util.Objects;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -48,5 +50,19 @@ public class Course implements Comparable<Course> {
     @Override
     public String toString() {
         return String.format("%s %s", this.sbj_list, this.cnbr_name).toUpperCase();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Course course = (Course) o;
+        return Objects.equals(sbj_list, course.sbj_list) &&
+                Objects.equals(cnbr_name, course.cnbr_name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sbj_list, cnbr_name);
     }
 }

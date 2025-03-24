@@ -11,9 +11,9 @@ import java.util.*;
 
 public class AuditFactory {
 
-    public static Audit getAudit(Plan plan, Summary summary, List<PlanList> planLists) {
-        Map<Requirement, List<Course>> requirementCourseListMap = matchCoursesToRequirements(plan, summary, planLists);
-        return new Audit(plan, requirementCourseListMap);
+    public static Audit getAudit(Plan plan, Summary summary, List<PlanList> planLists, Map<Course, Integer> courseUsageMap) {
+        Map<Requirement, List<Course>> requirementCourseListMap = matchCoursesToRequirements(plan, summary, planLists, courseUsageMap);
+        return new Audit(plan, requirementCourseListMap, courseUsageMap);
     }
 
     private static Map<Requirement, Integer> countRequirementOccurrences(Plan plan) {
@@ -27,10 +27,10 @@ public class AuditFactory {
     }
 
     private static Map<Requirement, List<Course>> matchCoursesToRequirements(Plan plan, Summary summary,
-            List<PlanList> planLists) {
+            List<PlanList> planLists, Map<Course, Integer> courseUsageMap) {
         List<Course> courseList = getStudentCourses(summary);
         Map<Requirement, List<Course>> requirementCourseMap = new HashMap<>();
-        Set<Course> assignedCourses = new HashSet<>();
+        Set<Course> locallyAssignedCourses = new HashSet<>();
         Map<Requirement, Integer> requirementCountMap = countRequirementOccurrences(plan);
 
         for (Category category : plan.getCategoryList()) {
@@ -44,7 +44,8 @@ public class AuditFactory {
 
                 List<Course> matchingCourses = new ArrayList<>();
                 for (Course course : courseList) {
-                    if (course.priority == Priority.Failed || assignedCourses.contains(course)) {
+                    if (course.priority == Priority.Failed || locallyAssignedCourses.contains(course) || 
+                        courseUsageMap.getOrDefault(course, 0) >= 2) {
                         continue;
                     }
 
@@ -61,7 +62,8 @@ public class AuditFactory {
                     }
 
                     coursesForRequirement.add(course);
-                    assignedCourses.add(course);    
+                    locallyAssignedCourses.add(course); 
+                    courseUsageMap.put(course, courseUsageMap.getOrDefault(course, 0) + 1); 
                 }
             }
         }

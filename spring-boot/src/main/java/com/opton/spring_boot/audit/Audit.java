@@ -23,12 +23,13 @@ public class Audit {
     private final Map<Requirement, List<Course>> requirementCourseListMap;
     private final Map<Category, Status> categoryStatusMap;
     private final Status overallStatus;
+    private final Map<Course, Integer> courseUsageMap; 
 
-    public Audit(Plan plan, Map<Requirement, List<Course>> requirementCourseListMap) {
+    public Audit(Plan plan, Map<Requirement, List<Course>> requirementCourseListMap, Map<Course, Integer> courseUsageMap) {
         this.plan = plan;
         this.requirementCourseListMap = requirementCourseListMap;
         this.categoryStatusMap = new TreeMap<>();
-
+        this.courseUsageMap = courseUsageMap;
         this.overallStatus = calculateStatuses();
     }
 
@@ -89,11 +90,15 @@ public class Audit {
         if (courseList == null || courseList.isEmpty()) {
             return Status.Incomplete;
         }
-    
+
         int validCourseCount = 0;
         boolean hasInProgress = false;
-    
+
         for (Course course : courseList) {
+            if (courseUsageMap.getOrDefault(course, 0) > 2) {
+                continue;
+            }
+
             if (course.getPriority() == Priority.InProgress) {
                 hasInProgress = true;
             }
@@ -101,7 +106,7 @@ public class Audit {
                 validCourseCount++;
             }
         }
-    
+
         if (hasInProgress) {
             return Status.Provisionally_Complete;
         } else if (validCourseCount >= requiredCount) {
@@ -118,20 +123,12 @@ public class Audit {
             List<Course> courseList = entry.getValue();
 
             for (Course course : courseList) {
-                if (course.getPriority() != Priority.Failed) {
+                if (course.getPriority() != Priority.Failed && courseUsageMap.getOrDefault(course, 0) <= 2) {
                     completedCourses++;
                 }
             }
         }
 
         return new double[] { completedCourses, this.plan.size() };
-    }
-
-    public List<Course> requirementCourseList(Requirement requirement) {
-        return requirementCourseListMap.get(requirement);
-    }
-
-    public Status status(Category category) {
-        return categoryStatusMap.get(category);
     }
 }
