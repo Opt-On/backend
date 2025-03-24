@@ -24,7 +24,7 @@ import com.opton.spring_boot.transcript_parser.types.TermSummary;
 @RequestMapping("/recommendation")
 public class RecommendationController {
 
-    private static WebClient webClient = WebClient.create("http://127.0.0.1:8008");
+    private static WebClient webClient = WebClient.create("http://3.142.114.228:8008");
     private static final Set<String> OPTIONS = Set.of(
         "Artificial Intelligence Option",
         "Biomechanics Option",
