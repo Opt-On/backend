@@ -29,7 +29,7 @@ public class TranscriptController {
         this.transcriptService = transcriptService;
     }
     
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
     @PostMapping("/upload")
     public ResponseEntity<String> handleFileUpload(@RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "true") boolean includeGrade, @RequestParam("email") String email) {
         if (file.isEmpty()) {
@@ -50,7 +50,7 @@ public class TranscriptController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
     @PostMapping("/upload/text")
     public ResponseEntity<String> handleTextTranscriptUpload(@RequestParam("file") MultipartFile file, @RequestParam(defaultValue = "true") boolean includeGrade, @RequestParam("email") String email) {
         if (file.isEmpty()) {

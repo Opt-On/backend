@@ -38,10 +38,28 @@ import com.opton.spring_boot.transcript_parser.types.TermSummary;
 @RequestMapping("/audit")
 public class AuditController {
 
+    public static Map<Course, Integer> combineMaps(Map<Course, Integer> map1, Map<Course, Integer> map2) {
+        Map<Course, Integer> combinedMap = new HashMap<>();
+
+        for (Map.Entry<Course, Integer> entry : map1.entrySet()) {
+            combinedMap.put(entry.getKey(), entry.getValue());
+        }
+
+        for (Map.Entry<Course, Integer> entry : map2.entrySet()) {
+            Course course = entry.getKey();
+            int count = entry.getValue();
+            combinedMap.put(course, combinedMap.getOrDefault(course, 0) + count);
+        }
+
+        return combinedMap;
+    }
+
     @Autowired
     private Firestore firestore;
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    // idk where to put these
+
+    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
     @PostMapping("/declared")
     public ResponseEntity<List<Audit>> handleDeclaredAudit(@RequestHeader("email") String email) {
         try {
@@ -157,49 +175,7 @@ public class AuditController {
         }
     }
 
-    // idk where to put these
-
-    private String getRelevantDegreeFile(Map<String, List<String>> degreeMap, String programName, String year) {
-        List<String> files = degreeMap.get(programName);
-        if (files == null || files.isEmpty())
-            return null;
-
-        List<String> sortedFiles = files.stream()
-                .sorted(Comparator.comparingInt(f -> Integer.parseInt(f.replaceAll("\\D+", ""))))
-                .collect(Collectors.toList());
-
-        if (year.isEmpty()) {
-            return sortedFiles.get(sortedFiles.size() - 1);
-        }
-
-        int yearInt = Integer.parseInt(year);
-        for (String file : sortedFiles) {
-            int fileYear = Integer.parseInt(file.replaceAll("\\D+", ""));
-            if (fileYear <= yearInt) {
-                return file;
-            }
-        }
-
-        return sortedFiles.get(sortedFiles.size() - 1);
-    }
-
-    public static Map<Course, Integer> combineMaps(Map<Course, Integer> map1, Map<Course, Integer> map2) {
-        Map<Course, Integer> combinedMap = new HashMap<>();
-
-        for (Map.Entry<Course, Integer> entry : map1.entrySet()) {
-            combinedMap.put(entry.getKey(), entry.getValue());
-        }
-
-        for (Map.Entry<Course, Integer> entry : map2.entrySet()) {
-            Course course = entry.getKey();
-            int count = entry.getValue();
-            combinedMap.put(course, combinedMap.getOrDefault(course, 0) + count);
-        }
-
-        return combinedMap;
-    }
-
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
     @PostMapping("/triple")
     public ResponseEntity<List<Audit>> handleTripleAudit(@RequestHeader("email") String email) {
         try {
@@ -276,7 +252,7 @@ public class AuditController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
     @PostMapping("/whatif")
     public ResponseEntity<Audit> handleWhatifAudit(@RequestHeader("email") String email,
             @RequestHeader("option") String option) {
@@ -400,5 +376,29 @@ public class AuditController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    private String getRelevantDegreeFile(Map<String, List<String>> degreeMap, String programName, String year) {
+        List<String> files = degreeMap.get(programName);
+        if (files == null || files.isEmpty())
+            return null;
+
+        List<String> sortedFiles = files.stream()
+                .sorted(Comparator.comparingInt(f -> Integer.parseInt(f.replaceAll("\\D+", ""))))
+                .collect(Collectors.toList());
+
+        if (year.isEmpty()) {
+            return sortedFiles.get(sortedFiles.size() - 1);
+        }
+
+        int yearInt = Integer.parseInt(year);
+        for (String file : sortedFiles) {
+            int fileYear = Integer.parseInt(file.replaceAll("\\D+", ""));
+            if (fileYear <= yearInt) {
+                return file;
+            }
+        }
+
+        return sortedFiles.get(sortedFiles.size() - 1);
     }
 }

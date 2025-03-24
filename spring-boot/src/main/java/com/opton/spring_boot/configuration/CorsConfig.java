@@ -12,7 +12,7 @@ public class CorsConfig {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/transcript/upload").allowedOrigins("http://localhost:3000");
+                registry.addMapping("/transcript/upload").allowedOrigins("http://localhost:3000", "https://opton.ca");
             }
         };
     }

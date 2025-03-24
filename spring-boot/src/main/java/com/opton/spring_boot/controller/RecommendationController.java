@@ -44,7 +44,7 @@ public class RecommendationController {
     @Autowired
     private Firestore firestore;
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
     @PostMapping("/")
     public ResponseEntity<String> handleFileUpload(@RequestHeader("email") String email, @RequestHeader("option") String optionName) {
         if (!OPTIONS.contains(optionName)){
