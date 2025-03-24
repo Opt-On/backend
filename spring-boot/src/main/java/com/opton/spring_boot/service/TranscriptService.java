@@ -58,6 +58,34 @@ public class TranscriptService {
         });
     }
 
+    public String setTranscriptSync(Summary summary, Boolean includeGrade, String email) {
+    try {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                DocumentReference docRef = firestore.collection("user").document(String.valueOf(email));
+
+                // Bypass adding grade info
+                if (!includeGrade) {
+                    summary.termSummaries = new ArrayList<>();
+                }
+
+                @SuppressWarnings("unchecked")
+                Map<String, Object> userJson = objectMapper.convertValue(summary, Map.class);
+
+                docRef.set(userJson).get();
+                return "Program Name set successfully";
+            } catch (ExecutionException | InterruptedException e) {
+                Thread.currentThread().interrupt();
+                return "Error setting Program Name";
+            }
+        }).get(); // Blocks and waits for completion
+    } catch (InterruptedException | ExecutionException e) {
+        Thread.currentThread().interrupt();
+        return "Error setting Program Name";
+    }
+}
+
+
     // synchronous firestore upload for debug, might wanna switch to this later to handle upload errors
     // public String setTranscript(Summary summary) throws InterruptedException, ExecutionException {
     //     DocumentReference docRef = firestore.collection("user").document(String.valueOf(summary.studentNumber));
