@@ -34,6 +34,7 @@ public class RecommendationController {
         "Environmental Engineering Option",
         "Life Sciences Option",
         "Management Science Option",
+        "Management Sciences Option",
         "Mechatronics Option",
         "Physical Sciences Option",
         "Quantum Engineering Option",
