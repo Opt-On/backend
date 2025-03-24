@@ -61,19 +61,16 @@ public class AuditController {
                 }
             }
 
-            Map<String, List<String>> degreeMap = new HashMap<>() {
+          Map<String, List<String>> degreeMap = new HashMap<>() {
                 {
                     put("Aerospace Engineering", List.of("AE2018.csv"));
                     put("Biomedical Engineering", List.of("BIOMEDE2017.csv"));
                     put("Chemical Engineering", List.of("CHE2020.csv", "CHE2021.csv", "CHE2022.csv", "CHE2023.csv"));
-                    put("Computer Engineering",
-                            List.of("COMPE2020.csv", "COMPE2021.csv", "COMPE2022.csv", "COMPE2023.csv"));
+                    put("Computer Engineering", List.of("COMPE2020.csv", "COMPE2021.csv", "COMPE2022.csv", "COMPE2023.csv"));
                     put("Electrical Engineering", List.of("ELE2020.csv", "ELE2021.csv", "ELE2022.csv", "ELE2023.csv"));
                     put("Mechanical Engineering", List.of("ME2020.csv", "ME2021.csv", "ME2022.csv", "ME2023.csv"));
-                    put("Mechatronics Engineering",
-                            List.of("MECTR2020.csv", "MECTR2021.csv", "MECTR2022.csv", "MECTR2023.csv"));
-                    put("Management Engineering",
-                            List.of("MGTE2020.csv", "MGTE2021.csv", "MGTE2022.csv", "MGTE2023.csv"));
+                    put("Mechatronics Engineering", List.of("MECTR2020.csv", "MECTR2021.csv", "MECTR2022.csv", "MECTR2023.csv"));
+                    put("Management Engineering", List.of("MGTE2020.csv", "MGTE2021.csv", "MGTE2022.csv", "MGTE2023.csv"));
                     put("Nanotechnology Engineering", List.of("NE2018.csv"));
                     put("Software Engineering", List.of("SE2020.csv", "SE2021.csv", "SE2022.csv", "SE2023.csv"));
                     put("Architectural Engineering", List.of("ARCHPPENG2017.csv"));
@@ -86,7 +83,6 @@ public class AuditController {
 
             Map<String, String> optionMap = new HashMap<String, String>() {
                 {
-                    put("Digital Hardware Option", "COGSCOPT2012.csv"); // FAKE
                     put("Cognitive Science Option", "COGSCOPT2012.csv");
                     put("Computer Engineering Option", "COMPENGOPT2024.csv");
                     put("Management Science Option", "MSCIOPT2023.csv");
@@ -278,6 +274,29 @@ public class AuditController {
             System.out.println(e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
+    }
+
+    private String getRelevantDegreeFile(Map<String, List<String>> degreeMap, String programName, String year) {
+        List<String> files = degreeMap.get(programName);
+        if (files == null || files.isEmpty()) return null;
+    
+        List<String> sortedFiles = files.stream()
+                .sorted(Comparator.comparingInt(f -> Integer.parseInt(f.replaceAll("\\D+", ""))))
+                .collect(Collectors.toList());
+    
+        if (year.isEmpty()) {
+            return sortedFiles.get(sortedFiles.size() - 1);
+        }
+    
+        int yearInt = Integer.parseInt(year);
+        for (String file : sortedFiles) {
+            int fileYear = Integer.parseInt(file.replaceAll("\\D+", ""));
+            if (fileYear <= yearInt) {
+                return file; 
+            }
+        }
+    
+        return sortedFiles.get(sortedFiles.size() - 1);
     }
 
     @CrossOrigin(origins = "http://localhost:3000")
