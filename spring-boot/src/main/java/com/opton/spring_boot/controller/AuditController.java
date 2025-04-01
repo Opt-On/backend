@@ -57,9 +57,7 @@ public class AuditController {
     @Autowired
     private Firestore firestore;
 
-    // idk where to put these
-
-    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
+    @CrossOrigin(origins = { "http://localhost:3000", "https://opton.ca" })
     @PostMapping("/declared")
     public ResponseEntity<List<Audit>> handleDeclaredAudit(@RequestHeader("email") String email) {
         try {
@@ -79,16 +77,19 @@ public class AuditController {
                 }
             }
 
-          Map<String, List<String>> degreeMap = new HashMap<>() {
+            Map<String, List<String>> degreeMap = new HashMap<>() {
                 {
                     put("Aerospace Engineering", List.of("AE2018.csv"));
                     put("Biomedical Engineering", List.of("BIOMEDE2017.csv"));
                     put("Chemical Engineering", List.of("CHE2020.csv", "CHE2021.csv", "CHE2022.csv", "CHE2023.csv"));
-                    put("Computer Engineering", List.of("COMPE2020.csv", "COMPE2021.csv", "COMPE2022.csv", "COMPE2023.csv"));
+                    put("Computer Engineering",
+                            List.of("COMPE2020.csv", "COMPE2021.csv", "COMPE2022.csv", "COMPE2023.csv"));
                     put("Electrical Engineering", List.of("ELE2020.csv", "ELE2021.csv", "ELE2022.csv", "ELE2023.csv"));
                     put("Mechanical Engineering", List.of("ME2020.csv", "ME2021.csv", "ME2022.csv", "ME2023.csv"));
-                    put("Mechatronics Engineering", List.of("MECTR2020.csv", "MECTR2021.csv", "MECTR2022.csv", "MECTR2023.csv"));
-                    put("Management Engineering", List.of("MGTE2020.csv", "MGTE2021.csv", "MGTE2022.csv", "MGTE2023.csv"));
+                    put("Mechatronics Engineering",
+                            List.of("MECTR2020.csv", "MECTR2021.csv", "MECTR2022.csv", "MECTR2023.csv"));
+                    put("Management Engineering",
+                            List.of("MGTE2020.csv", "MGTE2021.csv", "MGTE2022.csv", "MGTE2023.csv"));
                     put("Nanotechnology Engineering", List.of("NE2018.csv"));
                     put("Software Engineering", List.of("SE2020.csv", "SE2021.csv", "SE2022.csv", "SE2023.csv"));
                     put("Architectural Engineering", List.of("ARCHPPENG2017.csv"));
@@ -175,7 +176,86 @@ public class AuditController {
         }
     }
 
-    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
+    @CrossOrigin(origins = { "http://localhost:3000", "https://opton.ca" })
+    @PostMapping("/declared/degree")
+    public ResponseEntity<Audit> handleDegreeAudit(@RequestHeader("email") String email) {
+        try {
+            DocumentSnapshot document = firestore.collection("user").document(email).get().get();
+            if (!document.exists())
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+
+            Summary summary = document.toObject(Summary.class);
+
+            String year = "";
+            if (summary != null) {
+                for (TermSummary termSummary : summary.termSummaries) {
+                    if (termSummary.level.equals("1A")) {
+                        String yearString = Integer.toString(termSummary.termId);
+                        year = "20" + yearString.substring(1, yearString.length() - 1);
+                    }
+                }
+            }
+
+            Map<String, List<String>> degreeMap = new HashMap<>() {
+                {
+                    put("Aerospace Engineering", List.of("AE2018.csv"));
+                    put("Biomedical Engineering", List.of("BIOMEDE2017.csv"));
+                    put("Chemical Engineering", List.of("CHE2020.csv", "CHE2021.csv", "CHE2022.csv", "CHE2023.csv"));
+                    put("Computer Engineering",
+                            List.of("COMPE2020.csv", "COMPE2021.csv", "COMPE2022.csv", "COMPE2023.csv"));
+                    put("Electrical Engineering", List.of("ELE2020.csv", "ELE2021.csv", "ELE2022.csv", "ELE2023.csv"));
+                    put("Mechanical Engineering", List.of("ME2020.csv", "ME2021.csv", "ME2022.csv", "ME2023.csv"));
+                    put("Mechatronics Engineering",
+                            List.of("MECTR2020.csv", "MECTR2021.csv", "MECTR2022.csv", "MECTR2023.csv"));
+                    put("Management Engineering",
+                            List.of("MGTE2020.csv", "MGTE2021.csv", "MGTE2022.csv", "MGTE2023.csv"));
+                    put("Nanotechnology Engineering", List.of("NE2018.csv"));
+                    put("Software Engineering", List.of("SE2020.csv", "SE2021.csv", "SE2022.csv", "SE2023.csv"));
+                    put("Architectural Engineering", List.of("ARCHPPENG2017.csv"));
+                    put("Civil Engineering", List.of("CIVE2017.csv"));
+                    put("Environmental Engineering", List.of("ENVE2017.csv"));
+                    put("Geological Engineering", List.of("GEOE2017.csv"));
+                    put("Systems Design Engineering", List.of("SYDE2017.csv"));
+                }
+            };
+
+            Audit audit = null;
+
+            Map<Course, Integer> courseUsageMap = new HashMap<>();
+
+            if (summary != null) {
+                // degree
+                String degreeFile = getRelevantDegreeFile(degreeMap, summary.programName, year);
+
+                if (degreeFile == null) {
+                    throw new FileNotFoundException("no valid file found: " + summary.programName);
+                }
+
+                Resource resource = new ClassPathResource("degree/" + degreeFile);
+                if (!resource.exists()) {
+                    throw new FileNotFoundException("file not found: degree/" + degreeFile);
+                }
+
+                try (FileReader fileReader = new FileReader(resource.getFile())) {
+                    PlanCSVParser parser = new PlanCSVParser();
+                    parser.csvIn(fileReader);
+
+                    audit = AuditFactory.getAudit(parser.getPlans().get(0), summary, parser.getLists(),
+                            courseUsageMap);
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+                }
+            }
+
+            return ResponseEntity.status(HttpStatus.OK).body(audit);
+        } catch (Exception e) {
+            System.out.println(e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @CrossOrigin(origins = { "http://localhost:3000", "https://opton.ca" })
     @PostMapping("/triple")
     public ResponseEntity<List<Audit>> handleTripleAudit(@RequestHeader("email") String email) {
         try {
@@ -252,7 +332,7 @@ public class AuditController {
         }
     }
 
-    @CrossOrigin(origins = {"http://localhost:3000", "https://opton.ca"})
+    @CrossOrigin(origins = { "http://localhost:3000", "https://opton.ca" })
     @PostMapping("/whatif")
     public ResponseEntity<Audit> handleWhatifAudit(@RequestHeader("email") String email,
             @RequestHeader("option") String option) {
